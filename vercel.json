@@ -25,6 +25,8 @@
     { "source": "/api/youtube/(.*)", "destination": "/api/youtube.js" },
     { "source": "/api/youtube", "destination": "/api/youtube.js" },
 
+    { "source": "/api/seed", "destination": "/api/seed.js" },
+
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
