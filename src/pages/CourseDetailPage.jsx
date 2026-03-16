@@ -84,7 +84,8 @@ export default function CourseDetailPage() {
     </div>
   )
 
-  const videoSrc = `https://www.youtube.com/embed/videoseries?list=${course.playlist_id}`
+  const DEFAULT_PLAYLIST = 'PLWKjhJtqVAbnSe1qUNMG7AbPmjIG54u88'
+  const videoSrc = `https://www.youtube.com/embed/videoseries?list=${course.playlist_id || DEFAULT_PLAYLIST}`
 
   return (
     <div className="space-y-12 pb-20">
