@@ -26,7 +26,7 @@ export default function MainLayout() {
         
         <main className="flex-1 p-6 lg:p-10 max-w-7xl mx-auto w-full">
           {/* Transition wrapper */}
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="animate-in">
             <Outlet />
           </div>
         </main>

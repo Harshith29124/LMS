@@ -29,11 +29,11 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen auth-bg flex items-center justify-center p-6">
+    <div className="w-full max-w-xl mx-auto">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-xl"
+        className="w-full"
       >
         <div className="glass-panel p-10 rounded-[2.5rem] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 rounded-full blur-3xl -mr-16 -mt-16" />

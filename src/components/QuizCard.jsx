@@ -42,12 +42,12 @@ export default function QuizCard({ quiz, onComplete }) {
         </div>
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Knowledge Check</p>
-          <h3 className="text-lg font-black text-white">Validation Module</h3>
+          <h3 className="text-lg font-black text-slate-900 dark:text-white">Validation Module</h3>
         </div>
       </div>
 
       {/* Question */}
-      <h4 className="text-xl md:text-2xl font-black text-white mb-10 leading-relaxed italic">
+      <h4 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mb-10 leading-relaxed italic">
         "{quiz.question}"
       </h4>
 

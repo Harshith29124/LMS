@@ -10,14 +10,14 @@ export default function Modal({ open, onClose, title, children, maxWidth = 540 }
   return (
     <AnimatePresence>
       <motion.div
-        className="modal-overlay"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="modal-content"
+          className="w-full glass-panel rounded-[2.5rem] p-8 lg:p-10 border border-black/5 dark:border-white/10 shadow-2xl overflow-y-auto max-h-[90vh]"
           style={{ maxWidth }}
           onClick={(e) => e.stopPropagation()}
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -26,14 +26,13 @@ export default function Modal({ open, onClose, title, children, maxWidth = 540 }
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         >
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary-light)' }}>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-widest">
               {title}
             </h2>
             <button
               onClick={onClose}
-              className="btn btn-ghost btn-sm"
-              style={{ borderRadius: '50%', width: 32, height: 32, padding: 0 }}
+              className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all active:scale-95"
               aria-label="Close modal"
             >
               <X size={18} />

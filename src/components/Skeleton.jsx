@@ -4,13 +4,13 @@
 
 export function SkeletonCard() {
   return (
-    <div className="card" style={{ overflow: 'hidden' }}>
-      <div className="skeleton" style={{ height: 180 }} />
-      <div style={{ padding: 16 }}>
-        <div className="skeleton" style={{ height: 18, width: '75%', marginBottom: 8, borderRadius: 6 }} />
-        <div className="skeleton" style={{ height: 14, width: '90%', marginBottom: 6, borderRadius: 6 }} />
-        <div className="skeleton" style={{ height: 14, width: '60%', marginBottom: 16, borderRadius: 6 }} />
-        <div className="skeleton" style={{ height: 36, borderRadius: 8 }} />
+    <div className="glass-panel rounded-[2.5rem] overflow-hidden animate-pulse">
+      <div className="h-44 bg-black/5 dark:bg-white/5" />
+      <div className="p-6 space-y-3">
+        <div className="h-5 bg-black/5 dark:bg-white/5 rounded-lg w-3/4" />
+        <div className="h-4 bg-black/5 dark:bg-white/5 rounded-lg w-full" />
+        <div className="h-4 bg-black/5 dark:bg-white/5 rounded-lg w-3/5" />
+        <div className="h-10 bg-black/5 dark:bg-white/5 rounded-xl mt-4" />
       </div>
     </div>
   )
@@ -18,9 +18,13 @@ export function SkeletonCard() {
 
 export function SkeletonText({ lines = 3 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="space-y-2 animate-pulse">
       {Array.from({ length: lines }).map((_, i) => (
-        <div key={i} className="skeleton" style={{ height: 14, width: i === lines - 1 ? '60%' : '100%', borderRadius: 6 }} />
+        <div 
+          key={i} 
+          className="h-4 bg-black/5 dark:bg-white/5 rounded-lg" 
+          style={{ width: i === lines - 1 ? '60%' : '100%' }} 
+        />
       ))}
     </div>
   )
@@ -28,11 +32,11 @@ export function SkeletonText({ lines = 3 }) {
 
 export function SkeletonRow() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0' }}>
-      <div className="skeleton" style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0 }} />
-      <div style={{ flex: 1 }}>
-        <div className="skeleton" style={{ height: 14, width: '60%', marginBottom: 6, borderRadius: 6 }} />
-        <div className="skeleton" style={{ height: 12, width: '40%', borderRadius: 6 }} />
+    <div className="flex items-center gap-3 py-3 animate-pulse">
+      <div className="w-10 h-10 bg-black/5 dark:bg-white/5 rounded-xl flex-shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="h-4 bg-black/5 dark:bg-white/5 rounded-lg w-3/5" />
+        <div className="h-3 bg-black/5 dark:bg-white/5 rounded-lg w-2/5" />
       </div>
     </div>
   )

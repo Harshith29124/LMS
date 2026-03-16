@@ -25,7 +25,7 @@ export default function CreateCoursePage() {
     thumbnail: THUMBNAILS[0],
     category: 'Programming',
     level: 'Beginner',
-    playlistId: '', // Explicit YouTube Playlist
+    playlistId: '',
   })
   const [loading, setLoading] = useState(false)
   const [selectedThumb, setSelectedThumb] = useState(0)
@@ -82,7 +82,7 @@ export default function CreateCoursePage() {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-8">
           {/* General Information Card */}
-          <section className="glass-panel p-8 lg:p-10 rounded-[3rem] border-white/5 space-y-8">
+          <section className="glass-panel p-8 lg:p-10 rounded-[3rem] border-black/5 dark:border-white/5 space-y-8">
             <div className="flex items-center gap-3 text-brand-primary">
               <Type size={20} className="fill-current" />
               <h2 className="text-xl font-black uppercase tracking-widest">General Info</h2>
@@ -115,7 +115,7 @@ export default function CreateCoursePage() {
           </section>
 
           {/* Classification Section */}
-          <section className="glass-panel p-8 lg:p-10 rounded-[3rem] border-white/5 space-y-8">
+          <section className="glass-panel p-8 lg:p-10 rounded-[3rem] border-black/5 dark:border-white/5 space-y-8">
              <div className="flex items-center gap-3 text-brand-primary">
               <Layout size={20} className="fill-current" />
               <h2 className="text-xl font-black uppercase tracking-widest">Metadata</h2>
@@ -129,7 +129,7 @@ export default function CreateCoursePage() {
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
                 >
-                  {CATEGORIES.map((c) => <option key={c} value={c} className="bg-surface-900">{c}</option>)}
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className="space-y-2">
@@ -139,14 +139,14 @@ export default function CreateCoursePage() {
                   value={form.level}
                   onChange={(e) => setForm({ ...form, level: e.target.value })}
                 >
-                  {LEVELS.map((l) => <option key={l} value={l} className="bg-surface-900">{l}</option>)}
+                  {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
                 </select>
               </div>
             </div>
           </section>
 
           {/* YouTube Content Source (NewPipe Style) */}
-          <section className="glass-panel p-8 lg:p-10 rounded-[3rem] border-white/5 space-y-8">
+          <section className="glass-panel p-8 lg:p-10 rounded-[3rem] border-black/5 dark:border-white/5 space-y-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 text-brand-primary">
                 <PlayCircle size={20} className="fill-current" />
@@ -176,7 +176,7 @@ export default function CreateCoursePage() {
                   type="button"
                   onClick={handleYtSearch}
                   disabled={ytLoading}
-                  className="px-6 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 transition-all active:scale-95 font-bold text-sm"
+                  className="px-6 py-4 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-black/5 dark:border-white/5 transition-all active:scale-95 font-bold text-sm"
                 >
                   {ytLoading ? '...' : 'Search'}
                 </button>
@@ -196,16 +196,16 @@ export default function CreateCoursePage() {
                       className={`flex gap-4 p-4 rounded-2xl border cursor-pointer transition-all hover:-translate-y-1 ${
                         form.playlistId === result.id
                           ? 'bg-brand-primary/10 border-brand-primary shadow-lg shadow-brand-primary/10'
-                          : 'bg-white/5 border-white/5 hover:bg-white/10'
+                          : 'bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 hover:bg-black/10 dark:hover:bg-white/10'
                       }`}
                     >
-                      <div className="w-24 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-slate-800">
+                      <div className="w-24 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-slate-200 dark:bg-slate-800">
                         <img src={result.thumbnail} alt="" className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold text-white truncate">{result.title}</h4>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{result.title}</h4>
                         <p className="text-[10px] text-slate-500 mt-1 uppercase font-black">{result.videoCount} Videos</p>
-                        <p className="text-[9px] text-slate-600 truncate mt-0.5">{result.author}</p>
+                        <p className="text-[9px] text-slate-400 truncate mt-0.5">{result.author}</p>
                       </div>
                     </div>
                   ))}
@@ -213,7 +213,7 @@ export default function CreateCoursePage() {
               )}
 
               {!ytResults.length && !ytLoading && (
-                <p className="text-[10px] text-center text-slate-600 font-bold uppercase tracking-widest py-4">
+                <p className="text-[10px] text-center text-slate-500 font-bold uppercase tracking-widest py-4">
                   Search to import entire curriculums directly from YouTube
                 </p>
               )}
@@ -223,7 +223,7 @@ export default function CreateCoursePage() {
 
         {/* Sidebar: Thumbnail & Actions */}
         <div className="space-y-8">
-          <section className="glass-panel p-8 rounded-[3rem] border-white/5 space-y-8 sticky top-24">
+          <section className="glass-panel p-8 rounded-[3rem] border-black/5 dark:border-white/5 space-y-8 sticky top-24">
              <div className="flex items-center gap-3 text-brand-primary">
               <ImageIcon size={20} className="fill-current" />
               <h2 className="text-xl font-black uppercase tracking-widest">Visual Cover</h2>
@@ -250,7 +250,7 @@ export default function CreateCoursePage() {
                 ))}
               </div>
 
-              <div className="space-y-2 pt-4 border-t border-white/5">
+              <div className="space-y-2 pt-4 border-t border-black/5 dark:border-white/5">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Or provide explicit URL</label>
                 <input
                   type="url"

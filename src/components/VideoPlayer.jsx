@@ -1,7 +1,8 @@
 import { AlertCircle } from 'lucide-react'
 
 /**
- * extracts YouTube video ID or Playlist ID from various URL formats
+ * Extracts YouTube video ID or Playlist ID from various URL formats.
+ * Works with standard YouTube URLs — no API needed.
  */
 function getYouTubeData(url) {
   if (!url) return null;
@@ -31,13 +32,13 @@ export default function VideoPlayer({ url }) {
 
   if (!data) {
     return (
-      <div className="w-full h-full min-h-[400px] bg-slate-100 dark:bg-slate-900/50 flex flex-col items-center justify-center gap-6 border border-white/5 p-12 rounded-[2.5rem]">
-        <div className="w-20 h-20 rounded-[2rem] bg-slate-200 dark:bg-slate-800/30 flex items-center justify-center border border-white/5">
+      <div className="w-full h-full min-h-[400px] bg-slate-100 dark:bg-slate-900/50 flex flex-col items-center justify-center gap-6 border border-black/5 dark:border-white/5 p-12 rounded-[2.5rem]">
+        <div className="w-20 h-20 rounded-[2rem] bg-slate-200 dark:bg-slate-800/30 flex items-center justify-center border border-black/5 dark:border-white/5">
            <AlertCircle size={40} className="text-slate-400" />
         </div>
         <div className="text-center space-y-2">
-            <h4 className="text-lg font-bold text-slate-800 dark:text-white uppercase tracking-widest">Signal Missing</h4>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">No visual asset detected for this module.</p>
+            <h4 className="text-lg font-bold text-slate-800 dark:text-white uppercase tracking-widest">No Video</h4>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">No video content available for this module.</p>
         </div>
       </div>
     );
@@ -48,7 +49,7 @@ export default function VideoPlayer({ url }) {
     : `https://www.youtube.com/embed/${data.id}?rel=0&modestbranding=1`;
 
   return (
-    <div className="w-full h-full relative group rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-black">
+    <div className="w-full h-full relative rounded-[2.5rem] overflow-hidden border border-black/5 dark:border-white/10 shadow-2xl bg-black">
       <iframe
         className="w-full h-full min-h-[400px] lg:min-h-[500px] border-0"
         src={src}
@@ -56,11 +57,6 @@ export default function VideoPlayer({ url }) {
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
       />
-
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
-         <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Feed</span>
-      </div>
     </div>
   );
 }

@@ -61,19 +61,19 @@ export default async function handler(req, res) {
       const decoded = authenticate(req, res);
       if (!decoded) return;
       
-      const { title, description, thumbnail, category, level } = req.body;
-      const playlistId = detectPlaylist(title);
+      const { title, description, thumbnail, category, level, playlistId } = req.body;
+      const finalPlaylistId = playlistId || detectPlaylist(title);
 
       const [result] = await db.query(
         'INSERT INTO courses (title, description, thumbnail, category, level, instructor_id, playlist_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [title, description, thumbnail, category, level, decoded.id, playlistId]
+        [title, description, thumbnail, category, level, decoded.id, finalPlaylistId]
       );
       
       return res.status(201).json({ 
         id: result.insertId, 
         _id: result.insertId, 
         title,
-        playlistId 
+        playlistId: finalPlaylistId 
       });
     }
 

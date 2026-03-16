@@ -27,11 +27,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen auth-bg flex items-center justify-center p-6">
+    <div className="w-full max-w-md mx-auto">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full"
       >
         <div className="glass-panel p-8 rounded-[2rem] relative">
           <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-brand-primary rounded-3xl rotate-12 flex items-center justify-center shadow-2xl shadow-brand-primary/40">
