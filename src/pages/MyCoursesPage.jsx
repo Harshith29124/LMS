@@ -85,19 +85,19 @@ export default function MyCoursesPage() {
             ))}
           </div>
         ) : (
-          <div className="glass-panel border-dashed border-white/10 rounded-[4rem] p-24 text-center space-y-8 border-2">
-            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto text-slate-800">
-               <Box size={48} />
+          <div className="glass-panel border border-white/5 rounded-[3rem] p-24 text-center space-y-6">
+            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-slate-500">
+               <BookOpen size={40} />
             </div>
-            <div className="max-w-xs mx-auto space-y-3">
-              <h3 className="text-2xl font-bold text-white">Library Empty</h3>
-              <p className="text-slate-500">You haven't initialized any learning paths. Browse the architectural catalog to begin.</p>
+            <div className="max-w-xs mx-auto space-y-2">
+              <h3 className="text-xl font-bold text-white">Your library is empty</h3>
+              <p className="text-sm text-slate-500">Enroll in a course from the catalog to start your learning journey.</p>
             </div>
             <button 
                 onClick={() => navigate('/browse')}
-                className="premium-button px-10"
+                className="premium-button px-8"
             >
-              Browse Catalog
+              Browse Courses
             </button>
           </div>
         )}

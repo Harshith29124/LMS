@@ -11,13 +11,13 @@ const navItems = {
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/my-courses', icon: BookOpen, label: 'My Courses' },
     { to: '/browse', icon: Compass, label: 'Browse Courses' },
-    { to: '/progress', icon: TrendingUp, label: 'Progress' },
+    { to: '/progress', icon: TrendingUp, label: 'Learning Progress' },
     { to: '/profile', icon: User, label: 'Profile' },
   ],
   instructor: [
-    { to: '/instructor', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/instructor/create-course', icon: PlusCircle, label: 'Create Course' },
-    { to: '/browse', icon: Compass, label: 'Browse Courses' },
+    { to: '/instructor', icon: LayoutDashboard, label: 'Instructor Portal' },
+    { to: '/instructor/create-course', icon: PlusCircle, label: 'Create New Course' },
+    { to: '/browse', icon: Compass, label: 'Course Catalog' },
     { to: '/profile', icon: User, label: 'Profile' },
   ],
 }
@@ -38,12 +38,12 @@ export default function Sidebar({ open, onClose }) {
         {/* Logo */}
         <div className="flex items-center justify-between mb-10 px-2">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-brand-primary/20 rotate-3">
-              <GraduationCap className="text-white w-7 h-7 -rotate-3" />
+            <div className="w-12 h-12 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-brand-primary/20">
+              <GraduationCap className="text-white w-7 h-7" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-white leading-none">CraftConnect</h1>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">LMS Portal</span>
+              <h1 className="text-xl font-bold text-white leading-none">CraftConnect</h1>
+              <p className="text-[10px] font-semibold text-brand-primary tracking-widest mt-1 uppercase">LMS Platform</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl lg:hidden text-slate-400">
@@ -51,22 +51,22 @@ export default function Sidebar({ open, onClose }) {
           </button>
         </div>
 
-        {/* User Card */}
+        {/* User Workspace */}
         <div className="mb-10 px-2">
-          <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-4 group cursor-default">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 flex items-center justify-center border border-white/10 overflow-hidden">
-               <span className="text-lg font-black text-white">{user?.name?.[0]?.toUpperCase()}</span>
+          <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center border border-white/10 overflow-hidden">
+               <span className="text-lg font-bold text-white">{user?.name?.[0]?.toUpperCase()}</span>
             </div>
             <div className="flex-1 min-w-0">
-               <p className="font-bold text-white truncate">{user?.name}</p>
-               <p className="text-[10px] font-black uppercase tracking-widest text-brand-primary">{user?.role}</p>
+               <p className="font-semibold text-white truncate text-sm">{user?.name}</p>
+               <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{user?.role}</p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 space-y-2">
-          <p className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Core Menu</p>
+          <p className="px-4 text-[10px] font-semibold text-slate-500 uppercase tracking-[0.2em] mb-4">Navigation</p>
           {items.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -75,26 +75,22 @@ export default function Sidebar({ open, onClose }) {
               onClick={onClose}
               className={({ isActive }) => `nav-link group ${isActive ? 'active' : ''}`}
             >
-              <Icon size={20} className="group-hover:scale-110 transition-transform" />
-              <span className="flex-1">{label}</span>
+              <Icon size={18} className="group-hover:scale-110 transition-transform" />
+              <span className="flex-1 text-sm">{label}</span>
               <ChevronRight className={`transition-all duration-300 w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1`} />
             </NavLink>
           ))}
         </nav>
 
         {/* Action Footer */}
-        <div className="pt-6 border-t border-white/5 space-y-4">
+        <div className="pt-6 border-t border-white/5">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-rose-400 font-bold hover:bg-rose-500/10 transition-all group active:scale-95"
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-rose-500 font-semibold text-sm hover:bg-rose-500/10 transition-all group active:scale-95"
           >
-            <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
             <span>Sign Out</span>
           </button>
-
-          <div className="p-4 rounded-2xl bg-brand-primary/10 border border-brand-primary/20">
-            <p className="text-[10px] font-bold text-brand-primary text-center">v1.2.0 PRODUCTION BUILD</p>
-          </div>
         </div>
       </div>
     </aside>

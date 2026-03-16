@@ -14,11 +14,12 @@ export default function ProgressPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    let mounted = true
     const fetchData = async () => {
       try {
         const res = await enrollmentAPI.getMyEnrolled()
         const enrolled = res.data || []
-        setCourses(enrolled)
+        if (mounted) setCourses(enrolled)
 
         const progEntries = await Promise.all(
           enrolled.map(async (c) => {
@@ -30,14 +31,15 @@ export default function ProgressPage() {
             }
           })
         )
-        setProgressMap(Object.fromEntries(progEntries))
-      } catch {
-        toast.error('Failed to load progress')
+        if (mounted) setProgressMap(Object.fromEntries(progEntries))
+      } catch (err) {
+        if (mounted) console.error('Progress Load Error', err)
       } finally {
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     }
     fetchData()
+    return () => { mounted = false }
   }, [])
 
   const completed = courses.filter((c) => (progressMap[c._id]?.percentage || 0) === 100)

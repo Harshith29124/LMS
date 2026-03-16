@@ -61,15 +61,15 @@ export const quizAPI = {
 
 // ─── Enrollment ────────────────────────────────
 export const enrollmentAPI = {
-  enroll: (courseId) => api.post('/enroll', { courseId }), // calls /api/enroll/index.js
-  checkEnrollment: (courseId) => api.get('/enroll', { params: { courseId } }),
-  getMyEnrolled: () => api.get('/enroll'),
+  enroll: (courseId) => api.post('/enrollment/enroll', { courseId }),
+  checkEnrollment: (courseId) => api.get('/enrollment/check', { params: { courseId } }),
+  getMyEnrolled: () => api.get('/enrollment/my'),
 }
 
 // ─── Progress ──────────────────────────────────
 export const progressAPI = {
-  complete: (lessonId) => api.post('/progress', { lessonId }), // calls /api/progress/index.js
-  getCourseProgress: (courseId) => api.get('/progress', { params: { courseId } }),
+  complete: (lessonId) => api.post('/enrollment/progress', { lessonId }),
+  getCourseProgress: (courseId) => api.get('/enrollment/progress', { params: { courseId } }),
 }
 
 export default api

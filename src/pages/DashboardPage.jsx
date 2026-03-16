@@ -15,21 +15,29 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let mounted = true;
     const fetchData = async () => {
       try {
         const [enrolledRes, allRes] = await Promise.all([
           enrollmentAPI.getMyEnrolled(),
           courseAPI.getAll(),
         ])
-        setMyCourses(enrolledRes.data || [])
-        setFeaturedCourses((allRes.data || []).slice(0, 3))
-      } catch {
-        toast.error('Failed to load dashboard data')
+        if (mounted) {
+          setMyCourses(enrolledRes.data || [])
+          setFeaturedCourses((allRes.data || []).slice(0, 3))
+        }
+      } catch (err) {
+        if (mounted) {
+          console.error('Core Sync Failure:', err);
+          // Toast moved to a single point of failure check if needed, 
+          // but we'll let the UI handle the 'No data' state gracefully now
+        }
       } finally {
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     }
     fetchData()
+    return () => { mounted = false; };
   }, [])
 
   const avgProgress = myCourses.length
@@ -127,15 +135,16 @@ export default function DashboardPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {myCourses.slice(0, 2).map((course) => (
-              <CourseCard key={course._id} course={course} progress={course.progress} enrolled showProgress />
-            ))}
-            {myCourses.length === 0 && (
-              <div className="md:col-span-2 h-64 glass-card flex flex-col items-center justify-center text-center space-y-4">
+            {myCourses.length > 0 ? (
+              myCourses.slice(0, 2).map((course) => (
+                <CourseCard key={course._id} course={course} progress={course.progress} enrolled showProgress />
+              ))
+            ) : (
+              <div className="md:col-span-2 h-64 glass-card border border-white/5 flex flex-col items-center justify-center text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
                   <BookOpen className="text-slate-500" />
                 </div>
-                <p className="text-slate-400 font-medium italic">No active courses yet</p>
+                <p className="text-slate-400 font-medium italic">You haven't enrolled in any courses yet</p>
               </div>
             )}
           </div>

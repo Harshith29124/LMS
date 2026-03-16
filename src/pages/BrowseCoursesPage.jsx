@@ -15,21 +15,25 @@ export default function BrowseCoursesPage() {
   const [category, setCategory] = useState('All')
 
   useEffect(() => {
+    let mounted = true
     const fetchData = async () => {
       try {
         const [coursesRes, enrolledRes] = await Promise.all([
           courseAPI.getAll({ search, category }),
           enrollmentAPI.getMyEnrolled(),
         ])
-        setCourses(coursesRes.data || [])
-        setEnrolledIds((enrolledRes.data || []).map((c) => c._id))
-      } catch {
-        toast.error('Failed to load courses')
+        if (mounted) {
+          setCourses(coursesRes.data || [])
+          setEnrolledIds((enrolledRes.data || []).map((c) => c._id))
+        }
+      } catch (err) {
+        if (mounted) console.error('Browse Load Error', err)
       } finally {
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     }
     fetchData()
+    return () => { mounted = false }
   }, [search, category])
 
   return (
