@@ -30,10 +30,12 @@ export default async function handler(req, res) {
 
     // Ensure playlist_id column exists if table was created previously without it
     try {
-      await db.query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS playlist_id VARCHAR(100) DEFAULT '' AFTER instructor_id`);
+      await db.query(`ALTER TABLE courses ADD COLUMN playlist_id VARCHAR(100) DEFAULT '' AFTER instructor_id`);
     } catch (e) {
-      // Some MySQL versions don't support ADD COLUMN IF NOT EXISTS, ignore if already exists
-      if (!e.message.includes('Duplicate column name')) throw e;
+      // Ignore if already exists, otherwise rethrow
+      if (!e.message.includes('Duplicate column name')) {
+        console.error('Alter table failed:', e.message);
+      }
     }
 
     await db.query(`CREATE TABLE IF NOT EXISTS lessons (
