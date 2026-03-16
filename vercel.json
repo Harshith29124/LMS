@@ -1,6 +1,7 @@
 {
   "version": 2,
   "framework": "vite",
+  "name": "craftconnect-lms",
   "rewrites": [
     {
       "source": "/api/auth/(.*)",
@@ -20,18 +21,22 @@
     },
     {
       "source": "/api/enroll/(.*)",
-      "destination": "/api/enroll/index.js"
+      "destination": "/api/enrollment.js"
     },
     {
       "source": "/api/progress/(.*)",
-      "destination": "/api/progress/index.js"
+      "destination": "/api/enrollment.js"
     },
     {
       "source": "/api/courses",
       "destination": "/api/courses.js"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/api/courses/",
+      "destination": "/api/courses.js"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]

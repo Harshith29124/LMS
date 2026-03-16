@@ -6,16 +6,40 @@ export default async function handler(req, res) {
   const url = req.url.split('?')[0];
 
   try {
-    // GET /api/courses (List all)
-    if (url === '/api/courses' && req.method === 'GET') {
+    // GET /api/courses (List all) - Handle both /api/courses and /api/courses/
+    if ((url === '/api/courses' || url === '/api/courses/') && req.method === 'GET') {
       const { category, search } = req.query;
-      let sql = 'SELECT c.*, u.name as instructor_name FROM courses c JOIN users u ON u.id = c.instructor_id WHERE 1=1';
+      let sql = `
+        SELECT c.*, u.name as instructor_name, u.email as instructor_email 
+        FROM courses c 
+        JOIN users u ON u.id = c.instructor_id 
+        WHERE 1=1
+      `;
       const params = [];
-      if (category && category !== 'All') { sql += ' AND category = ?'; params.push(category); }
-      if (search) { sql += ' AND title LIKE ?'; params.push(`%${search}%`); }
+      
+      if (category && category !== 'All') { 
+        sql += ' AND c.category = ?'; 
+        params.push(category); 
+      }
+      if (search) { 
+        sql += ' AND (c.title LIKE ? OR c.description LIKE ?)'; 
+        params.push(`%${search}%`, `%${search}%`); 
+      }
+      
+      sql += ' ORDER BY c.created_at DESC';
       
       const [rows] = await db.query(sql, params);
-      return res.status(200).json(rows.map(r => ({ ...r, _id: r.id, instructorId: { name: r.instructor_name } })));
+      return res.status(200).json(rows.map(r => ({
+        ...r,
+        _id: r.id,
+        id: r.id,
+        instructorId: {
+          _id: r.instructor_id,
+          name: r.instructor_name,
+          email: r.instructor_email
+        },
+        createdAt: r.created_at
+      })));
     }
 
     // POST /api/courses/create
@@ -27,23 +51,40 @@ export default async function handler(req, res) {
         'INSERT INTO courses (title, description, thumbnail, category, level, instructor_id) VALUES (?, ?, ?, ?, ?, ?)',
         [title, description, thumbnail, category, level, decoded.id]
       );
-      return res.status(201).json({ id: result.insertId, title });
+      return res.status(201).json({ id: result.insertId, _id: result.insertId, title });
     }
 
     // GET /api/courses/get (Single)
     if (url.includes('/get') && req.method === 'GET') {
       const { id } = req.query;
-      const [rows] = await db.query('SELECT c.*, u.name as instructor_name FROM courses c JOIN users u ON u.id = c.instructor_id WHERE c.id = ?', [id]);
-      if (rows.length === 0) return res.status(404).json({ message: 'Not found' });
-      return res.status(200).json({ ...rows[0], _id: rows[0].id, instructorId: { name: rows[0].instructor_name } });
+      const [rows] = await db.query(`
+        SELECT c.*, u.name as instructor_name, u.email as instructor_email 
+        FROM courses c 
+        JOIN users u ON u.id = c.instructor_id 
+        WHERE c.id = ?
+      `, [id]);
+      
+      if (rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+      
+      const r = rows[0];
+      return res.status(200).json({
+        ...r,
+        _id: r.id,
+        id: r.id,
+        instructorId: {
+          _id: r.instructor_id,
+          name: r.instructor_name,
+          email: r.instructor_email
+        }
+      });
     }
 
     // GET /api/courses/my (Instructor personal)
     if (url.includes('/my') && req.method === 'GET') {
       const decoded = authenticate(req, res);
       if (!decoded) return;
-      const [rows] = await db.query('SELECT * FROM courses WHERE instructor_id = ?', [decoded.id]);
-      return res.status(200).json(rows.map(r => ({ ...r, _id: r.id })));
+      const [rows] = await db.query('SELECT * FROM courses WHERE instructor_id = ? ORDER BY created_at DESC', [decoded.id]);
+      return res.status(200).json(rows.map(r => ({ ...r, _id: r.id, id: r.id })));
     }
 
     // DELETE /api/courses/delete
@@ -52,12 +93,12 @@ export default async function handler(req, res) {
       if (!decoded) return;
       const { id } = req.query;
       await db.query('DELETE FROM courses WHERE id = ? AND instructor_id = ?', [id, decoded.id]);
-      return res.status(200).json({ message: 'Deleted' });
+      return res.status(200).json({ message: 'Course deleted successfully' });
     }
 
-    return res.status(404).json({ message: 'Course endpoint not found' });
+    return res.status(404).json({ message: `Course endpoint not found: ${url}` });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    console.error('[API COURSES ERROR]', err);
+    return res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 }
