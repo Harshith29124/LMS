@@ -23,7 +23,7 @@ export default function AuthLayout() {
             <div className="w-12 h-12 rounded-2xl bg-brand-primary/20 border border-brand-primary/30 flex items-center justify-center backdrop-blur-md shadow-lg shadow-brand-primary/20">
                <span className="text-xl">🎓</span>
             </div>
-            <span className="text-xl font-black tracking-widest uppercase text-slate-900 dark:text-white">CraftConnect</span>
+            <span className="text-xl font-black tracking-widest uppercase text-slate-900 dark:text-white">LMS</span>
          </div>
          <div className="hidden md:flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />

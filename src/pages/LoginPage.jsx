@@ -90,7 +90,7 @@ export default function LoginPage() {
           <p className="text-center text-slate-500 dark:text-slate-400 mt-8">
             Don't have an account?{' '}
             <Link to="/signup" className="text-brand-primary font-semibold hover:underline decoration-brand-primary/30">
-              Join CraftConnect
+              Join LMS
             </Link>
           </p>
         </div>

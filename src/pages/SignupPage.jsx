@@ -39,7 +39,7 @@ export default function SignupPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 rounded-full blur-3xl -mr-16 -mt-16" />
           
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3">Join CraftConnect</h1>
+            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3">Join LMS</h1>
             <p className="text-slate-500 dark:text-slate-400">Master new skills with our expert-led platform</p>
           </div>
 

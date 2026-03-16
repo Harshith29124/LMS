@@ -42,7 +42,7 @@ export default function Sidebar({ open, onClose }) {
               <GraduationCap className="text-white w-7 h-7" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-none">CraftConnect</h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-none">LMS</h1>
               <p className="text-[10px] font-semibold text-brand-primary tracking-widest mt-1 uppercase">LMS Platform</p>
             </div>
           </div>
