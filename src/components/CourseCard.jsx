@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Clock, GraduationCap, Star, ArrowRight } from 'lucide-react'
+import { Clock, GraduationCap, Star, ArrowRight, Play } from 'lucide-react'
 import ProgressBar from './ProgressBar'
 
 export default function CourseCard({ course, enrolled, showProgress, progress = 0 }) {
@@ -24,11 +24,16 @@ export default function CourseCard({ course, enrolled, showProgress, progress = 
           />
           <div className="absolute inset-0 bg-black/20" />
           
-          <div className="absolute top-3 left-3 flex gap-2">
+          <div className="absolute top-3 left-3 flex flex-wrap gap-2">
             <span className="premium-badge">{course.category || 'Skill'}</span>
             <span className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/10 backdrop-blur-md text-[10px] font-bold text-white border border-white/10">
               {course.level || 'Beginner'}
             </span>
+            {course.playlist_id && (
+              <span className="px-2 py-0.5 rounded-full bg-red-600/80 backdrop-blur-md text-[10px] font-bold text-white border border-red-500/20 flex items-center gap-1 shadow-lg shadow-red-500/20">
+                <Play size={8} className="fill-current" /> YouTube
+              </span>
+            )}
           </div>
           
           <div className="absolute bottom-3 right-3 text-white flex items-center gap-1">
