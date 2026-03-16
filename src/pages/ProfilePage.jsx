@@ -51,8 +51,8 @@ export default function ProfilePage() {
         
         <div className="relative z-10 flex flex-col items-center text-center space-y-6">
           <div className="relative group">
-            <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center shadow-2xl shadow-brand-primary/20 rotate-3 transition-transform group-hover:rotate-6 duration-500">
-               <span className="text-5xl font-black text-white -rotate-3 group-hover:-rotate-6 transition-transform">
+            <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center shadow-2xl shadow-brand-primary/20 transition-transform duration-500">
+               <span className="text-5xl font-black text-white transition-transform">
                  {user?.name?.[0]?.toUpperCase()}
                </span>
             </div>

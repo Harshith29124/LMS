@@ -182,7 +182,7 @@ export default function CourseDetailPage() {
                   allowFullScreen
                 />
               </div>
-            ) : enrolled && course.playlist_id ? (
+            ) : course.playlist_id ? (
               <div className="aspect-video">
                 <iframe
                   className="w-full h-full border-0"

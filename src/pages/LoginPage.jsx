@@ -34,8 +34,8 @@ export default function LoginPage() {
         className="w-full"
       >
         <div className="glass-panel p-8 rounded-[2rem] relative">
-          <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-brand-primary rounded-3xl rotate-12 flex items-center justify-center shadow-2xl shadow-brand-primary/40">
-            <LogIn className="w-12 h-12 text-white -rotate-12" />
+          <div className="w-24 h-24 bg-brand-primary/10 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-brand-primary/20 shadow-xl shadow-brand-primary/10 transition-transform duration-500">
+             <LogIn className="w-12 h-12 text-brand-primary transition-transform" />
           </div>
 
           <div className="text-center mt-8 mb-10">
