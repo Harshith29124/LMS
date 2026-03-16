@@ -16,11 +16,11 @@ export function getPool() {
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       waitForConnections: true,
-      connectionLimit: 2,
+      connectionLimit: 1, // Filess.io limit is 5, multiple Vercel instances might hit it
       queueLimit: 0,
       enableKeepAlive: false,
       ssl: {
-        rejectUnauthorized: false // Required for filess.io and most cloud providers
+        rejectUnauthorized: false
       }
     };
 

@@ -1,9 +1,9 @@
 import { cors } from './config/middleware.js';
 
 /**
- * YouTube integration using NewPipe-style HTML scraping.
- * Falls back to noembed/YouTube oEmbed for basic metadata if needed.
- * No API key needed.
+ * YouTube integration using robust recursive JSON scraping.
+ * This method searches the entire YouTube response JSON for video/playlist objects,
+ * making it resilient to frequent UI and structural changes.
  */
 
 async function fetchWithHeaders(url) {
@@ -29,70 +29,49 @@ function extractInitialData(html) {
 }
 
 /**
- * Scrape YouTube playlist page directly.
+ * Robustly find all instances of a key in a nested object.
  */
-async function fetchPlaylistVideosScrape(playlistId) {
-  try {
-    const url = `https://www.youtube.com/playlist?list=${playlistId}`;
-    const response = await fetchWithHeaders(url);
-
-    if (!response.ok) {
-      return { items: [], playlistTitle: '', error: `YouTube ${response.status}` };
-    }
-
-    const html = await response.text();
-    const data = extractInitialData(html);
-    if (!data) return { items: [], playlistTitle: '', error: 'ytInitialData not found' };
-
-    return parsePlaylistData(data);
-  } catch (err) {
-    console.error('[Scrape fallback error]', err.message);
-    return { items: [], playlistTitle: '', error: err.message };
-  }
+function findAllByKey(obj, key, results = []) {
+  if (!obj || typeof obj !== 'object') return results;
+  if (obj[key]) results.push(obj[key]);
+  Object.keys(obj).forEach(k => {
+    findAllByKey(obj[k], key, results);
+  });
+  return results;
 }
 
 /**
- * Parses ytInitialData JSON for playlist videos.
+ * Parses ytInitialData for playlist videos.
  */
 function parsePlaylistData(data) {
-  let playlistTitle = '';
-  const items = [];
+  let playlistTitle = data?.metadata?.playlistMetadataRenderer?.title ||
+    data?.header?.playlistHeaderRenderer?.title?.simpleText ||
+    data?.header?.playlistHeaderRenderer?.title?.runs?.[0]?.text || '';
 
-  try {
-    const contents = data?.contents?.twoColumnBrowseResultsRenderer?.tabs?.[0]
-      ?.tabRenderer?.content?.sectionListRenderer?.contents?.[0]
-      ?.itemSectionRenderer?.contents?.[0]?.playlistVideoListRenderer?.contents;
+  // Heuristic: Search recursively for playlistVideoRenderer
+  const vids = findAllByKey(data, 'playlistVideoRenderer');
+  
+  const items = vids.map((video, index) => {
+    const videoId = video.videoId;
+    if (!videoId) return null;
 
-    playlistTitle = data?.metadata?.playlistMetadataRenderer?.title ||
-      data?.header?.playlistHeaderRenderer?.title?.simpleText || '';
+    const title = video.title?.runs?.[0]?.text || video.title?.simpleText || 'Untitled';
+    const thumbnail = video.thumbnail?.thumbnails?.slice(-1)?.[0]?.url ||
+      `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+    const duration = video.lengthText?.simpleText || '';
 
-    if (!contents || !Array.isArray(contents)) return { items: [], playlistTitle };
-
-    contents.forEach((item, index) => {
-      const video = item?.playlistVideoRenderer;
-      if (!video) return;
-
-      const videoId = video.videoId;
-      const title = video.title?.runs?.[0]?.text || video.title?.simpleText || 'Untitled';
-      const thumbnail = video.thumbnail?.thumbnails?.slice(-1)?.[0]?.url ||
-        `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-      const duration = video.lengthText?.simpleText || '';
-
-      items.push({
-        _id: `yt_${videoId}`,
-        videoId,
-        title,
-        description: '',
-        thumbnail,
-        position: index,
-        videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
-        duration,
-        lessonOrder: index,
-      });
-    });
-  } catch (parseErr) {
-    console.error('[Playlist parse error]', parseErr.message);
-  }
+    return {
+      _id: `yt_${videoId}`,
+      videoId,
+      title,
+      description: '',
+      thumbnail,
+      position: index,
+      videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
+      duration,
+      lessonOrder: index,
+    };
+  }).filter(Boolean);
 
   return { items, playlistTitle };
 }
@@ -109,50 +88,53 @@ async function searchPlaylistsScrape(query) {
 
     const html = await response.text();
     const data = extractInitialData(html);
-    if (!data) {
-      return [];
-    }
+    if (!data) return [];
 
     const results = [];
-    const sectionContents = data?.contents?.twoColumnSearchResultsRenderer
-      ?.primaryContents?.sectionListRenderer?.contents;
     
-    if (!sectionContents) return [];
+    // Search for playlistRenderer recursively
+    const playlists = findAllByKey(data, 'playlistRenderer');
+    playlists.forEach(playlist => {
+       results.push({
+          id: playlist.playlistId,
+          title: playlist.title?.simpleText || playlist.title?.runs?.[0]?.text || '',
+          thumbnail: playlist.thumbnails?.[0]?.thumbnails?.slice(-1)?.[0]?.url ||
+            playlist.thumbnailRenderer?.playlistVideoThumbnailRenderer?.thumbnail?.thumbnails?.[0]?.url || '',
+          videoCount: playlist.videoCount || playlist.videoCountText?.simpleText || '0',
+          author: playlist.shortBylineText?.runs?.[0]?.text || '',
+        });
+    });
 
-
-    for (const section of sectionContents) {
-      const items = section?.itemSectionRenderer?.contents;
-      if (!items) continue;
-
-      for (const item of items) {
-        // Old style (playlistRenderer)
-        if (item.playlistRenderer) {
-          const playlist = item.playlistRenderer;
-          results.push({
-            id: playlist.playlistId,
-            title: playlist.title?.simpleText || playlist.title?.runs?.[0]?.text || '',
-            thumbnail: playlist.thumbnails?.[0]?.thumbnails?.slice(-1)?.[0]?.url ||
-              playlist.thumbnailRenderer?.playlistVideoThumbnailRenderer?.thumbnail?.thumbnails?.[0]?.url || '',
-            videoCount: playlist.videoCount || playlist.videoCountText?.simpleText || '0',
-            author: playlist.shortBylineText?.runs?.[0]?.text || '',
-          });
-        }
-        // New style (lockupViewModel)
-        else if (item.lockupViewModel) {
-          const m = item.lockupViewModel;
-          results.push({
-            id: m.contentId,
-            title: m.metadata?.lockupMetadataViewModel?.title?.content || 'Untitled',
-            thumbnail: m.contentImage?.collectionThumbnailViewModel?.primaryThumbnail?.thumbnailViewModel?.image?.sources?.[0]?.url || '',
-            videoCount: m.contentImage?.collectionThumbnailViewModel?.primaryThumbnail?.thumbnailViewModel?.overlays?.[0]?.thumbnailOverlayBadgeViewModel?.thumbnailBadges?.[0]?.thumbnailBadgeViewModel?.text || '0',
-            author: m.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel?.metadataRows?.[0]?.metadataParts?.[0]?.text?.content || '',
-          });
-        }
+    // Search for lockupViewModel recursively (new YouTube search layout)
+    const lockups = findAllByKey(data, 'lockupViewModel');
+    lockups.forEach(m => {
+      // Check if it's a playlist lockup
+      const metadata = m.metadata?.lockupMetadataViewModel;
+      const isPlaylist = m.contentId?.startsWith('PL') || 
+                         m.contentImage?.collectionThumbnailViewModel || 
+                         metadata?.metadata?.contentMetadataViewModel?.metadataRows?.some(r => 
+                            r.metadataParts?.some(p => p.text?.content?.toLowerCase().includes('playlist'))
+                         );
+      
+      if (isPlaylist && m.contentId) {
+        results.push({
+          id: m.contentId,
+          title: metadata?.title?.content || 'Untitled',
+          thumbnail: m.contentImage?.collectionThumbnailViewModel?.primaryThumbnail?.thumbnailViewModel?.image?.sources?.[0]?.url || '',
+          videoCount: m.contentImage?.collectionThumbnailViewModel?.primaryThumbnail?.thumbnailViewModel?.overlays?.[0]?.thumbnailOverlayBadgeViewModel?.thumbnailBadges?.[0]?.thumbnailBadgeViewModel?.text || 'Playlist',
+          author: metadata?.metadata?.contentMetadataViewModel?.metadataRows?.[0]?.metadataParts?.[0]?.text?.content || '',
+        });
       }
-    }
+    });
 
-    // Limit to 12 results
-    return results.slice(0, 12);
+    // Deduplicate by ID
+    const seen = new Set();
+    return results.filter(r => {
+      if (!r.id || seen.has(r.id)) return false;
+      seen.add(r.id);
+      return true;
+    }).slice(0, 12);
+
   } catch (err) {
     console.error('[Search scrape error]', err.message);
     return [];
@@ -169,36 +151,29 @@ export default async function handler(req, res) {
     if (url.includes('/search')) {
       const { q } = req.query;
       if (!q) return res.status(400).json({ message: 'Query is required' });
-
-      console.log('[YouTube Search] Query:', q);
       const results = await searchPlaylistsScrape(q);
       return res.status(200).json({ results });
     }
 
     // ─── PLAYLIST ─────────────────────────────────
     const { playlistId } = req.query;
-
     if (!playlistId) {
       return res.status(400).json({ message: 'playlistId is required' });
     }
 
-    console.log('[YouTube Playlist] ID:', playlistId);
-    const { items, playlistTitle, error } = await fetchPlaylistVideosScrape(playlistId);
+    const response = await fetchWithHeaders(`https://www.youtube.com/playlist?list=${playlistId}`);
+    if (!response.ok) return res.status(200).json({ items: [], totalResults: 0, source: 'error' });
 
-    if (items.length === 0 && error) {
-      return res.status(200).json({
-        items: [],
-        totalResults: 0,
-        source: 'newpipe_fallback',
-        playlistTitle: '',
-        note: 'Playlist extraction failed. The embedded player will be used as fallback.',
-      });
-    }
+    const html = await response.text();
+    const data = extractInitialData(html);
+    if (!data) return res.status(200).json({ items: [], totalResults: 0, source: 'no_data' });
+
+    const { items, playlistTitle } = parsePlaylistData(data);
 
     return res.status(200).json({
       items,
       totalResults: items.length,
-      source: 'newpipe_extraction',
+      source: 'recursive_scraping',
       playlistTitle,
     });
 
@@ -207,7 +182,6 @@ export default async function handler(req, res) {
     return res.status(500).json({
       message: 'Failed to extract YouTube data',
       error: err.message,
-      source: 'newpipe_error',
     });
   }
 }
