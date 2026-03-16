@@ -1,79 +1,43 @@
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { useTheme } from '../hooks/useTheme'
 
 export default function AuthLayout() {
   const { user } = useAuth()
-  const { isDark } = useTheme()
 
   if (user) return <Navigate to="/dashboard" replace />
 
   return (
-    <div className={isDark ? 'dark' : ''} style={{ minHeight: '100vh', display: 'flex' }}>
-      {/* Left: decorative panel */}
-      <div style={{
-        flex: 1,
-        display: 'none',
-        background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 50%, #22C55E 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-      }} className="auth-left">
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, transparent 60%)',
-        }} />
-        <div style={{ position: 'relative', zIndex: 1, padding: '48px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.2)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 20 }}>🎓</span>
+    <div className="min-h-screen bg-surface-950 flex flex-col relative overflow-hidden font-outfit">
+      {/* Immersive Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-brand-primary/10 rounded-full blur-[120px] -translate-y-1/2 opacity-50 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-brand-secondary/10 rounded-full blur-[150px] translate-y-1/3 translate-x-1/3 opacity-50 pointer-events-none" />
+      
+      {/* Decorative Grid */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wIDEwaDQwTTEwIDB2NDAiIHN0cm9rZT0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIi8+Cjwvc3ZnPg==')] pointer-events-none" />
+
+      {/* Dynamic Header */}
+      <header className="absolute top-0 left-0 w-full p-8 z-10 flex items-center justify-between pointer-events-none">
+         <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-brand-primary/20 border border-brand-primary/30 flex items-center justify-center backdrop-blur-md shadow-lg shadow-brand-primary/20">
+               <span className="text-xl">🎓</span>
             </div>
-            <span style={{ color: 'white', fontSize: 20, fontWeight: 700 }}>CraftConnect LMS</span>
-          </div>
-          <div>
-            <h1 style={{ color: 'white', fontSize: 36, fontWeight: 800, lineHeight: 1.2, marginBottom: 16 }}>
-              Learn. Create.
-              <br />Excel.
-            </h1>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, lineHeight: 1.6 }}>
-              Join thousands of learners building real skills with expert-led courses, interactive quizzes, and progress tracking.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: 24 }}>
-            {[
-              { label: '10K+', sub: 'Learners' },
-              { label: '500+', sub: 'Courses' },
-              { label: '98%', sub: 'Satisfaction' },
-            ].map(({ label, sub }) => (
-              <div key={sub}>
-                <div style={{ color: 'white', fontSize: 24, fontWeight: 800 }}>{label}</div>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>{sub}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            <span className="text-xl font-black text-white tracking-widest uppercase">CraftConnect</span>
+         </div>
+         <div className="hidden md:flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">System Online</span>
+         </div>
+      </header>
 
-      {/* Right: auth form */}
-      <div style={{
-        width: '100%',
-        maxWidth: 480,
-        margin: '0 auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '32px 24px',
-        background: 'var(--bg-light)',
-      }}>
-        <div style={{ width: '100%' }}>
-          <Outlet />
-        </div>
-      </div>
-
-      <style>{`
-        @media (min-width: 768px) {
-          .auth-left { display: flex !important; }
-        }
-      `}</style>
+      {/* Main Outlet Container */}
+      <main className="flex-1 flex items-center justify-center p-6 relative z-10 w-full">
+         <Outlet />
+      </main>
+      
+      {/* Footer Details */}
+      <footer className="absolute bottom-6 w-full text-center z-10 pointer-events-none">
+         <p className="text-[10px] uppercase font-black tracking-[0.3em] text-slate-600">Secure Initialization Protocol v2.0</p>
+      </footer>
     </div>
   )
 }
