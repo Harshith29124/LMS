@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -8,7 +8,7 @@
   --color-surface-900: #0f172a;
   --color-surface-800: #1e293b;
   --color-surface-700: #334155;
-  --font-outfit: "Outfit", sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
 }
 
 @layer base {
@@ -35,7 +35,7 @@
 
   body {
     @apply antialiased selection:bg-brand-primary/30;
-    font-family: var(--font-outfit);
+    font-family: var(--font-sans);
     background-color: var(--surface);
     color: var(--text-main);
     overflow-x: hidden;
@@ -61,13 +61,6 @@
     @apply transition-all duration-300 rounded-3xl p-6 backdrop-blur-xl;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-  }
-
-  .input-field {
-    @apply w-full px-5 py-4 rounded-2xl transition-all outline-none;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    color: var(--text-main);
   }
 
   /* Interaction Elements */
@@ -103,24 +96,26 @@
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
   }
 
-  .course-card {
-    @apply relative block;
-    perspective: 1000px;
-  }
-
-  .course-card-inner {
-    @apply relative overflow-hidden rounded-[2.5rem] transition-all duration-500 hover:-translate-y-2;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
-  }
-
-  .course-card-inner:hover {
-    @apply border-brand-primary/30 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)];
-  }
-
   .premium-badge {
     @apply px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-primary/20 text-brand-primary border border-brand-primary/30;
+  }
+
+  /* Progress bar */
+  .progress-bar-container {
+    @apply w-full rounded-full overflow-hidden;
+    background: var(--glass-border);
+  }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full bg-gradient-to-r from-brand-primary to-brand-secondary;
+  }
+
+  /* Custom inner scrollbar for panels */
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply rounded-full;
+    background: var(--glass-border);
   }
 }
 

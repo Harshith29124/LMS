@@ -21,7 +21,7 @@ export default function MobileNav() {
   const items = user?.role === 'instructor' ? instructorItems : learnerItems
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-surface-950/80 backdrop-blur-3xl border-t border-white/5 lg:hidden pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 backdrop-blur-3xl border-t border-black/5 dark:border-white/5 lg:hidden pb-safe" style={{ backgroundColor: 'var(--glass-bg)' }}>
       <div className="flex items-center justify-around px-2 py-3">
         {items.map(({ to, icon: Icon, label }) => (
           <NavLink

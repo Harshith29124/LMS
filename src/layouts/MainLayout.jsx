@@ -8,7 +8,7 @@ export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--surface)', color: 'var(--text-main)' }}>
       {/* Sidebar for Desktop */}
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

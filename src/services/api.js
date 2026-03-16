@@ -72,4 +72,9 @@ export const progressAPI = {
   getCourseProgress: (courseId) => api.get('/enrollment/progress', { params: { courseId } }),
 }
 
+// ─── YouTube ──────────────────────────────────
+export const youtubeAPI = {
+  getPlaylist: (playlistId) => api.get('/youtube', { params: { playlistId } }),
+}
+
 export default api

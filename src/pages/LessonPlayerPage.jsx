@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { lessonAPI, quizAPI, progressAPI } from '../services/api'
+import { useWatchProgress } from '../hooks/useWatchProgress'
 import VideoPlayer from '../components/VideoPlayer'
 import LessonList from '../components/LessonList'
 import QuizCard from '../components/QuizCard'
@@ -12,6 +13,7 @@ import toast from 'react-hot-toast'
 export default function LessonPlayerPage() {
   const { courseId, lessonId } = useParams()
   const navigate = useNavigate()
+  const { saveProgress } = useWatchProgress()
   const [lesson, setLesson] = useState(null)
   const [lessons, setLessons] = useState([])
   const [quiz, setQuiz] = useState(null)
@@ -32,6 +34,17 @@ export default function LessonPlayerPage() {
         setLesson(lessonRes.data)
         setLessons(lessonsRes.data || [])
         setProgress(progRes.data)
+
+        // Track watch progress for Continue Learning
+        if (lessonRes.data) {
+          saveProgress(courseId, {
+            lessonId,
+            videoId: lessonRes.data.videoUrl,
+            title: lessonRes.data.title,
+            thumbnail: '',
+            courseTitle: '',
+          })
+        }
 
         try {
           const quizRes = await quizAPI.getForLesson(lessonId)
