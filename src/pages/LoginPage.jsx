@@ -39,15 +39,15 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center mt-8 mb-10">
-            <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Welcome Back</h1>
-            <p className="text-slate-400">Sign in to continue your learning journey</p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">Welcome Back</h1>
+            <p className="text-slate-500 dark:text-slate-400">Sign in to continue your learning journey</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300 ml-1">Email Address</label>
+              <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Email Address</label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                 <input
                   type="email"
                   required
@@ -61,11 +61,11 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between ml-1">
-                <label className="text-sm font-medium text-slate-300">Password</label>
+                <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Password</label>
                 <a href="#" className="text-xs text-brand-primary hover:underline">Forgot?</a>
               </div>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                 <input
                   type="password"
                   required
@@ -87,7 +87,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-slate-400 mt-8">
+          <p className="text-center text-slate-500 dark:text-slate-400 mt-8">
             Don't have an account?{' '}
             <Link to="/signup" className="text-brand-primary font-semibold hover:underline decoration-brand-primary/30">
               Join CraftConnect

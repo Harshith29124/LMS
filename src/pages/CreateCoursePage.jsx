@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { courseAPI, youtubeAPI } from '../services/api'
+import api, { courseAPI } from '../services/api'
 import { ArrowLeft, Sparkles, Layout, Type, Image as ImageIcon, Rocket, ChevronRight, Search, PlayCircle, Plus, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -37,7 +37,7 @@ export default function CreateCoursePage() {
     if (!ytSearch.trim()) return
     setYtLoading(true)
     try {
-      const res = await youtubeAPI.get('/youtube/search', { params: { q: ytSearch } })
+      const res = await api.get('/youtube/search', { params: { q: ytSearch } })
       setYtResults(res.data.results || [])
     } catch (err) {
       toast.error('YouTube search failed')
@@ -68,13 +68,13 @@ export default function CreateCoursePage() {
       {/* Header */}
       <header className="flex items-center gap-6">
         <button 
-          className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 text-slate-400 hover:text-white transition-all active:scale-90" 
+          className="p-3 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-2xl border border-black/5 dark:border-white/5 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all active:scale-90" 
           onClick={() => navigate('/instructor')}
         >
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="text-3xl font-black text-white">Course Architect</h1>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Course Architect</h1>
           <p className="text-slate-500 font-medium">Design and structure your next masterpiece</p>
         </div>
       </header>

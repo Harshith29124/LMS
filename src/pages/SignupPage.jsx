@@ -39,14 +39,14 @@ export default function SignupPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 rounded-full blur-3xl -mr-16 -mt-16" />
           
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-extrabold tracking-tight text-white mb-3">Join CraftConnect</h1>
-            <p className="text-slate-400">Master new skills with our expert-led platform</p>
+            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3">Join CraftConnect</h1>
+            <p className="text-slate-500 dark:text-slate-400">Master new skills with our expert-led platform</p>
           </div>
 
           <form onSubmit={handleSignup} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 ml-1">Full Name</label>
+                <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Full Name</label>
                 <div className="relative group">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                   <input
@@ -61,7 +61,7 @@ export default function SignupPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 ml-1">Email Address</label>
+                <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Email Address</label>
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                   <input
@@ -77,7 +77,7 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300 ml-1">Password</label>
+              <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Password</label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                 <input
@@ -92,7 +92,7 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-4">
-              <label className="text-sm font-medium text-slate-300 ml-1">Choose your role</label>
+              <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Choose your role</label>
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
@@ -100,12 +100,12 @@ export default function SignupPage() {
                   className={`flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
                     role === 'learner' 
                       ? 'bg-brand-primary/10 border-brand-primary shadow-lg shadow-brand-primary/20' 
-                      : 'bg-white/5 border-white/5 hover:border-white/10'
+                      : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/5 hover:border-black/20 dark:hover:border-white/10'
                   }`}
                 >
                   <GraduationCap className={`w-8 h-8 ${role === 'learner' ? 'text-brand-primary' : 'text-slate-500'}`} />
                   <div className="text-center">
-                    <p className={`font-bold ${role === 'learner' ? 'text-white' : 'text-slate-400'}`}>Learner</p>
+                    <p className={`font-bold ${role === 'learner' ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>Learner</p>
                     <p className="text-[10px] text-slate-500">I want to learn</p>
                   </div>
                 </button>
@@ -116,12 +116,12 @@ export default function SignupPage() {
                   className={`flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
                     role === 'instructor' 
                       ? 'bg-brand-secondary/10 border-brand-secondary shadow-lg shadow-brand-secondary/20' 
-                      : 'bg-white/5 border-white/5 hover:border-white/10'
+                      : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/5 hover:border-black/20 dark:hover:border-white/10'
                   }`}
                 >
                   <Briefcase className={`w-8 h-8 ${role === 'instructor' ? 'text-brand-secondary' : 'text-slate-500'}`} />
                   <div className="text-center">
-                    <p className={`font-bold ${role === 'instructor' ? 'text-white' : 'text-slate-400'}`}>Instructor</p>
+                    <p className={`font-bold ${role === 'instructor' ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>Instructor</p>
                     <p className="text-[10px] text-slate-500">I want to teach</p>
                   </div>
                 </button>

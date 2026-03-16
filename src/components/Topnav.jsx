@@ -9,7 +9,7 @@ export default function Topnav({ onMenuClick }) {
   const navigate = useNavigate()
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-3xl bg-surface/80 dark:bg-surface-950/50 border-b border-surface-border h-20 flex items-center shrink-0">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-3xl border-b border-black/5 dark:border-white/5 h-20 flex items-center shrink-0" style={{ backgroundColor: 'var(--glass-bg)' }}>
       <div className="flex-1 flex items-center justify-between px-6 lg:px-10 max-w-7xl mx-auto w-full">
         {/* Left: Mobile Toggle & Date */}
         <div className="flex items-center gap-4">
