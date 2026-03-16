@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { lessonAPI, quizAPI, progressAPI } from '../services/api'
 import VideoPlayer from '../components/VideoPlayer'
 import LessonList from '../components/LessonList'
 import QuizCard from '../components/QuizCard'
-import { SkeletonText } from '../components/Skeleton'
 import ReactMarkdown from 'react-markdown'
-import { CheckCircle, ChevronLeft, ChevronRight, List } from 'lucide-react'
+import { CheckCircle, ChevronLeft, ChevronRight, Layout, BookOpen, Layers, Menu, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function LessonPlayerPage() {
@@ -18,7 +17,7 @@ export default function LessonPlayerPage() {
   const [quiz, setQuiz] = useState(null)
   const [progress, setProgress] = useState({ completedLessons: [], percentage: 0 })
   const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [completing, setCompleting] = useState(false)
 
   useEffect(() => {
@@ -34,7 +33,6 @@ export default function LessonPlayerPage() {
         setLessons(lessonsRes.data || [])
         setProgress(progRes.data)
 
-        // Try to load quiz
         try {
           const quizRes = await quizAPI.getForLesson(lessonId)
           setQuiz(quizRes.data)
@@ -42,7 +40,7 @@ export default function LessonPlayerPage() {
           setQuiz(null)
         }
       } catch {
-        toast.error('Failed to load lesson')
+        toast.error('Failed to synchronize lesson module')
       } finally {
         setLoading(false)
       }
@@ -57,9 +55,9 @@ export default function LessonPlayerPage() {
       await progressAPI.complete(lessonId)
       const progRes = await progressAPI.getCourseProgress(courseId)
       setProgress(progRes.data)
-      toast.success('Lesson marked as complete! ✅')
+      toast.success('Milestone synchronized! ✅')
     } catch {
-      toast.error('Failed to mark complete')
+      toast.error('Failed to register progress')
     } finally {
       setCompleting(false)
     }
@@ -70,121 +68,166 @@ export default function LessonPlayerPage() {
   const nextLesson = lessons[currentIndex + 1]
   const isCompleted = progress.completedLessons.includes(lessonId)
 
-  if (loading) {
-    return (
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div className="skeleton" style={{ height: 400, borderRadius: 16, marginBottom: 24 }} />
-        <SkeletonText lines={8} />
-      </div>
-    )
-  }
+  if (loading) return (
+    <div className="flex gap-10 animate-pulse h-[80vh]">
+        <div className="flex-1 space-y-6">
+            <div className="aspect-video glass-panel rounded-[3rem]" />
+            <div className="h-40 glass-panel rounded-3xl" />
+        </div>
+        <div className="w-80 glass-panel rounded-3xl hidden lg:block" />
+    </div>
+  )
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ maxWidth: 1200, margin: '0 auto' }}>
-      {/* Top breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/courses/${courseId}`)} id="back-to-course">
-          <ChevronLeft size={16} /> Back to Course
-        </button>
-        <span style={{ color: 'var(--text-secondary-light)', fontSize: 13 }}>/</span>
-        <span style={{ fontSize: 13, color: 'var(--text-secondary-light)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {lesson?.title}
-        </span>
-        <button
-          className="btn btn-ghost btn-sm"
-          style={{ marginLeft: 'auto' }}
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          id="toggle-lesson-sidebar"
-        >
-          <List size={16} /> Lessons
-        </button>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: sidebarOpen ? '1fr 280px' : '1fr', gap: 24, transition: 'all 0.3s' }}>
-        {/* Main lesson content */}
-        <div>
-          {/* Video player */}
-          <div style={{ marginBottom: 24 }}>
-            <VideoPlayer url={lesson?.videoUrl} />
-          </div>
-
-          {/* Lesson info */}
-          <div className="card-flat" style={{ padding: 28, marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
-              <div>
-                <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>{lesson?.title}</h1>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary-light)' }}>
-                  Lesson {currentIndex + 1} of {lessons.length}
-                </div>
-              </div>
-
-              {/* Mark complete button */}
-              <button
-                className={`btn ${isCompleted ? 'btn-accent' : 'btn-outline'}`}
-                onClick={handleComplete}
-                disabled={completing || isCompleted}
-                id="mark-complete-btn"
-              >
-                <CheckCircle size={16} />
-                {isCompleted ? 'Completed!' : completing ? 'Saving...' : 'Mark Complete'}
-              </button>
-            </div>
-
-            {/* Lesson content / markdown */}
-            {lesson?.content && (
-              <div className="markdown-content">
-                <ReactMarkdown>{lesson.content}</ReactMarkdown>
-              </div>
-            )}
-          </div>
-
-          {/* Quiz */}
-          {quiz && (
-            <div style={{ marginBottom: 20 }}>
-              <QuizCard quiz={quiz} onComplete={handleComplete} />
-            </div>
-          )}
-
-          {/* Navigation buttons */}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
-            <button
-              className="btn btn-outline"
-              onClick={() => navigate(`/courses/${courseId}/lessons/${prevLesson._id}`)}
-              disabled={!prevLesson}
-              id="prev-lesson-btn"
-            >
-              <ChevronLeft size={16} /> Previous
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                if (nextLesson) navigate(`/courses/${courseId}/lessons/${nextLesson._id}`)
-                else navigate(`/courses/${courseId}`)
-              }}
-              id="next-lesson-btn"
-            >
-              {nextLesson ? 'Next Lesson' : 'Finish Course'} <ChevronRight size={16} />
-            </button>
+    <div className="max-w-[1600px] mx-auto space-y-8 pb-20">
+      {/* Immersive Learning Header */}
+      <header className="flex items-center justify-between px-4 py-2 border-b border-white/5 mb-6">
+        <div className="flex items-center gap-4 min-w-0">
+          <Link 
+            to={`/courses/${courseId}`} 
+            className="p-2 hover:bg-white/5 rounded-xl text-slate-500 hover:text-white transition-all active:scale-90"
+          >
+            <ChevronLeft size={24} />
+          </Link>
+          <div className="min-w-0">
+             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary hidden sm:block">Module Access System</h4>
+             <h1 className="text-sm md:text-lg font-bold text-white truncate">{lesson?.title}</h1>
           </div>
         </div>
+        
+        <div className="flex items-center gap-4">
+             <div className="hidden md:flex flex-col items-end px-4 border-r border-white/10">
+                <p className="text-[10px] font-black text-slate-500 uppercase">Synchronized</p>
+                <p className="text-xs font-bold text-white">{progress.percentage}% COMPLETE</p>
+             </div>
+             <button 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className={`p-3 rounded-2xl transition-all active:scale-95 border ${sidebarOpen ? 'bg-brand-primary/10 border-brand-primary/30 text-brand-primary' : 'bg-white/5 border-white/10 text-slate-400'}`}
+             >
+                {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+             </button>
+        </div>
+      </header>
 
-        {/* Lesson sidebar */}
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="card-flat"
-            style={{ padding: 20, alignSelf: 'start', position: 'sticky', top: 80, maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}
-          >
-            <LessonList
-              lessons={lessons}
-              activeLessonId={lessonId}
-              completedLessons={progress.completedLessons}
-              onSelect={(l) => navigate(`/courses/${courseId}/lessons/${l._id}`)}
-            />
-          </motion.div>
-        )}
+      <div className="flex flex-col lg:flex-row gap-10 relative">
+        {/* Playback & Content Column */}
+        <div className="flex-1 space-y-8 min-w-0">
+           {/* Primary Player */}
+           <div className="glass-panel overflow-hidden rounded-[3rem] shadow-2xl shadow-black/60 border-white/5">
+              <VideoPlayer url={lesson?.videoUrl} />
+           </div>
+
+           {/* Module Information Details */}
+           <div className="glass-panel p-8 lg:p-12 rounded-[3.5rem] border-white/5 space-y-10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-8 border-b border-white/5">
+                 <div className="space-y-2">
+                    <div className="flex items-center gap-3 text-brand-primary">
+                        <Layers size={16} />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">Technical Specs</span>
+                    </div>
+                    <h2 className="text-3xl font-black text-white">{lesson?.title}</h2>
+                    <p className="text-sm text-slate-500 font-bold uppercase tracking-widest italic">Asset {currentIndex + 1} of {lessons.length}</p>
+                 </div>
+
+                 <button
+                    onClick={handleComplete}
+                    disabled={completing || isCompleted}
+                    className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-3 transition-all active:scale-95 ${
+                        isCompleted 
+                        ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
+                        : 'bg-brand-primary text-white shadow-lg shadow-brand-primary/30 hover:scale-[1.02]'
+                    }`}
+                  >
+                    <CheckCircle size={18} />
+                    {isCompleted ? 'Module Synchronized' : completing ? 'Processing...' : 'Mark as Complete'}
+                  </button>
+              </div>
+
+              {/* Technical Documentation Layer */}
+              {lesson?.content && (
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 text-slate-400">
+                        <BookOpen size={18} />
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em]">Documentation</h3>
+                    </div>
+                    <div className="markdown-viewer text-slate-300 leading-relaxed text-lg prose prose-invert max-w-none prose-headings:text-white prose-strong:text-brand-secondary prose-code:text-brand-primary">
+                        <ReactMarkdown>{lesson.content}</ReactMarkdown>
+                    </div>
+                </div>
+              )}
+
+              {/* Knowledge Check Layer */}
+              {quiz && (
+                 <div className="pt-10 border-t border-white/5 space-y-8">
+                    <div className="flex items-center gap-3 text-amber-500">
+                        <Layout size={18} />
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em]">Knowledge Validation</h3>
+                    </div>
+                    <QuizCard quiz={quiz} onComplete={handleComplete} />
+                 </div>
+              )}
+           </div>
+
+           {/* Sequence Navigation Navigation */}
+           <div className="flex items-center justify-between pt-6">
+              <button
+                className={`p-4 md:px-8 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-3 text-sm font-black uppercase tracking-widest transition-all ${!prevLesson ? 'opacity-30 grayscale cursor-not-allowed' : 'hover:bg-white/10 active:scale-90 text-white'}`}
+                onClick={() => prevLesson && navigate(`/courses/${courseId}/lessons/${prevLesson._id}`)}
+                disabled={!prevLesson}
+              >
+                <ChevronLeft size={20} /> <span className="hidden sm:inline">Prev Module</span>
+              </button>
+              
+              <button
+                className={`p-4 md:px-8 bg-brand-primary rounded-2xl flex items-center gap-3 text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-[1.02] active:scale-90 shadow-xl shadow-brand-primary/20 ${!nextLesson ? 'bg-gradient-to-r from-brand-primary to-brand-secondary' : ''}`}
+                onClick={() => {
+                  if (nextLesson) navigate(`/courses/${courseId}/lessons/${nextLesson._id}`)
+                  else navigate(`/courses/${courseId}`)
+                }}
+              >
+                <span className="hidden sm:inline">{nextLesson ? 'Next Module' : 'Sync Exit'}</span> 
+                {nextLesson ? <ChevronRight size={20} /> : <CheckCircle size={20} />}
+              </button>
+           </div>
+        </div>
+
+        {/* Integrated Navigation Sidebar */}
+        <AnimatePresence>
+            {sidebarOpen && (
+              <motion.aside
+                initial={{ opacity: 0, x: 50, width: 0 }}
+                animate={{ opacity: 1, x: 0, width: 340 }}
+                exit={{ opacity: 0, x: 50, width: 0 }}
+                className="hidden xl:block overflow-hidden sticky top-24 h-[calc(100vh-120px)]"
+              >
+                <div className="glass-panel h-full rounded-[3rem] border-white/5 flex flex-col p-8 overflow-hidden">
+                    <div className="flex items-center gap-3 mb-8 px-2">
+                        <List size={18} className="text-brand-primary" />
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Project Curiculum</h3>
+                    </div>
+                    <div className="flex-1 overflow-y-auto px-1 custom-scrollbar">
+                        <LessonList
+                            lessons={lessons}
+                            activeLessonId={lessonId}
+                            completedLessons={progress.completedLessons}
+                            onSelect={(l) => navigate(`/courses/${courseId}/lessons/${l._id}`)}
+                        />
+                    </div>
+                    
+                    <div className="mt-8 p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-brand-primary/20 flex items-center justify-center">
+                            <CheckCircle size={16} className="text-brand-primary" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase">Synchronicity</p>
+                            <p className="text-xs font-bold text-white">{progress.completedLessons.length}/{lessons.length} Modules</p>
+                        </div>
+                    </div>
+                </div>
+              </motion.aside>
+            )}
+        </AnimatePresence>
       </div>
-    </motion.div>
+    </div>
   )
 }

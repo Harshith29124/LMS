@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { courseAPI } from '../services/api'
-import { ArrowLeft, Upload } from 'lucide-react'
+import { ArrowLeft, Sparkles, Layout, Type, Image as ImageIcon, Rocket, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const CATEGORIES = ['Programming', 'Design', 'Business', 'Marketing', 'Data Science', 'DevOps', 'Other']
@@ -32,137 +32,157 @@ export default function CreateCoursePage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.title.trim() || !form.description.trim()) {
-      return toast.error('Title and description are required')
+      return toast.error('Title and description are essential fields')
     }
     setLoading(true)
     try {
       const res = await courseAPI.create(form)
-      toast.success('Course created successfully! 🎉')
+      toast.success('Course Created Successfully! 🚀')
       navigate(`/instructor/courses/${res.data._id}/lessons`)
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create course')
+      toast.error(err.response?.data?.message || 'Failed to initialize course')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ maxWidth: 760, margin: '0 auto' }}>
+    <div className="max-w-4xl mx-auto space-y-10 pb-20">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/instructor')} id="back-btn">
-          <ArrowLeft size={16} />
+      <header className="flex items-center gap-6">
+        <button 
+          className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 text-slate-400 hover:text-white transition-all active:scale-90" 
+          onClick={() => navigate('/instructor')}
+        >
+          <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>Create New Course</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary-light)' }}>Fill in the details below to publish your course</p>
+          <h1 className="text-3xl font-black text-white">Course Architect</h1>
+          <p className="text-slate-500 font-medium">Design and structure your next masterpiece</p>
         </div>
-      </div>
+      </header>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        {/* Basic info */}
-        <div className="card-flat" style={{ padding: 24 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>Course Information</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="course-title">Course Title *</label>
-              <input
-                id="course-title"
-                type="text"
-                className="form-input"
-                placeholder="e.g. Complete React Developer Course"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                required
-              />
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="lg:col-span-2 space-y-8">
+          {/* General Information Card */}
+          <section className="glass-panel p-8 lg:p-10 rounded-[3rem] border-white/5 space-y-8">
+            <div className="flex items-center gap-3 text-brand-primary">
+              <Type size={20} className="fill-current" />
+              <h2 className="text-xl font-black uppercase tracking-widest">General Info</h2>
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="course-description">Description *</label>
-              <textarea
-                id="course-description"
-                className="form-input"
-                placeholder="What will students learn in this course? Describe the key topics, prerequisites, and outcomes..."
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                required
-                style={{ minHeight: 130 }}
-              />
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Course Identity</label>
+                <input
+                  type="text"
+                  className="input-field text-lg font-bold"
+                  placeholder="e.g. Masterclass: Advanced System Design"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Curriculum Abstract</label>
+                <textarea
+                  className="input-field min-h-[200px] leading-relaxed"
+                  placeholder="Draft a compelling description of what your students will achieve..."
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Classification Section */}
+          <section className="glass-panel p-8 lg:p-10 rounded-[3rem] border-white/5 space-y-8">
+             <div className="flex items-center gap-3 text-brand-primary">
+              <Layout size={20} className="fill-current" />
+              <h2 className="text-xl font-black uppercase tracking-widest">Metadata</h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div className="form-group">
-                <label className="form-label" htmlFor="course-category">Category</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Domain</label>
                 <select
-                  id="course-category"
-                  className="form-input"
+                  className="input-field cursor-pointer appearance-none pr-10"
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
                 >
-                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {CATEGORIES.map((c) => <option key={c} value={c} className="bg-surface-900">{c}</option>)}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="course-level">Level</label>
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Audience Level</label>
                 <select
-                  id="course-level"
-                  className="form-input"
+                  className="input-field cursor-pointer appearance-none pr-10"
                   value={form.level}
                   onChange={(e) => setForm({ ...form, level: e.target.value })}
                 >
-                  {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                  {LEVELS.map((l) => <option key={l} value={l} className="bg-surface-900">{l}</option>)}
                 </select>
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
-        {/* Thumbnail picker */}
-        <div className="card-flat" style={{ padding: 24 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Course Thumbnail</h2>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary-light)', marginBottom: 16 }}>
-            Pick from our curated collection or enter a custom URL
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
-            {THUMBNAILS.map((url, i) => (
-              <div
-                key={i}
-                onClick={() => { setSelectedThumb(i); setForm({ ...form, thumbnail: url }) }}
-                id={`thumbnail-option-${i}`}
-                style={{
-                  borderRadius: 10, overflow: 'hidden', cursor: 'pointer',
-                  border: `2.5px solid ${selectedThumb === i ? '#6366F1' : 'transparent'}`,
-                  transition: 'all 0.2s',
-                  opacity: selectedThumb === i ? 1 : 0.7,
-                }}
-              >
-                <img src={url} alt={`thumb-${i}`} style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
+        {/* Sidebar: Thumbnail & Actions */}
+        <div className="space-y-8">
+          <section className="glass-panel p-8 rounded-[3rem] border-white/5 space-y-8 sticky top-24">
+             <div className="flex items-center gap-3 text-brand-primary">
+              <ImageIcon size={20} className="fill-current" />
+              <h2 className="text-xl font-black uppercase tracking-widest">Visual Cover</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="aspect-video w-full rounded-2xl overflow-hidden border-2 border-brand-primary/20 shadow-2xl relative group">
+                <img src={form.thumbnail} alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                   <Sparkles className="text-white animate-pulse" />
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="custom-thumbnail">Or enter custom URL</label>
-            <input
-              id="custom-thumbnail"
-              type="url"
-              className="form-input"
-              placeholder="https://example.com/image.jpg"
-              value={form.thumbnail}
-              onChange={(e) => { setForm({ ...form, thumbnail: e.target.value }); setSelectedThumb(-1) }}
-            />
-          </div>
-        </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          className="btn btn-primary btn-lg"
-          disabled={loading}
-          id="submit-course-btn"
-        >
-          {loading ? 'Creating...' : '🚀 Create Course & Add Lessons'}
-        </button>
+              <div className="grid grid-cols-3 gap-2">
+                {THUMBNAILS.map((url, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => { setSelectedThumb(i); setForm({ ...form, thumbnail: url }) }}
+                    className={`aspect-square rounded-xl overflow-hidden border-2 transition-all active:scale-95 ${selectedThumb === i ? 'border-brand-primary' : 'border-transparent opacity-60'}`}
+                  >
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-2 pt-4 border-t border-white/5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Or provide explicit URL</label>
+                <input
+                  type="url"
+                  className="input-field text-xs py-3"
+                  placeholder="https://images.unsplash.com/..."
+                  value={form.thumbnail}
+                  onChange={(e) => { setForm({ ...form, thumbnail: e.target.value }); setSelectedThumb(-1) }}
+                />
+              </div>
+            </div>
+
+            <div className="pt-8">
+                <button
+                  type="submit"
+                  className="premium-button w-full flex items-center justify-center gap-3 group"
+                  disabled={loading}
+                >
+                  {loading ? 'Designing...' : 'Generate Course'}
+                  <Rocket size={18} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                </button>
+            </div>
+          </section>
+        </div>
       </form>
-    </motion.div>
+    </div>
   )
 }

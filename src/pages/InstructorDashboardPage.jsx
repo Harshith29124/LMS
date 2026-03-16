@@ -3,8 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { courseAPI } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
-import { SkeletonCard } from '../components/Skeleton'
-import { Plus, Edit3, Trash2, BookOpen, Users, BarChart2 } from 'lucide-react'
+import { Plus, Edit3, Trash2, BookOpen, Users, BarChart2, ArrowRight, Layers } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function InstructorDashboardPage() {
@@ -31,127 +30,168 @@ export default function InstructorDashboardPage() {
     try {
       await courseAPI.delete(courseId)
       setCourses((prev) => prev.filter((c) => c._id !== courseId))
-      toast.success('Course deleted')
+      toast.success('Course deleted forever')
     } catch {
       toast.error('Failed to delete course')
     }
   }
 
   const stats = [
-    { label: 'Total Courses', value: courses.length, icon: BookOpen, color: '#6366F1', bg: 'rgba(99,102,241,0.12)' },
-    { label: 'Published', value: courses.filter((c) => c.isPublished).length, icon: BarChart2, color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
-    { label: 'Total Students', value: courses.length * 12, icon: Users, color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
+    { label: 'Total Courses', value: courses.length, icon: Layers, color: 'text-brand-primary', bg: 'bg-brand-primary/10' },
+    { label: 'Active Students', value: Math.floor(courses.length * 15.4), icon: Users, color: 'text-green-500', bg: 'bg-green-500/10' },
+    { label: 'Total Revenue', value: '$0.00', icon: BarChart2, color: 'text-amber-500', bg: 'bg-amber-500/10' },
   ]
 
+  if (loading) return (
+    <div className="space-y-8 animate-pulse">
+      <div className="h-40 glass-panel rounded-[3rem]" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[1, 2, 3].map(i => <div key={i} className="h-28 glass-panel rounded-3xl" />)}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {[1, 2].map(i => <div key={i} className="h-64 glass-panel rounded-[2.5rem]" />)}
+      </div>
+    </div>
+  )
+
   return (
-    <div>
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>Instructor Dashboard</h1>
-          <p style={{ color: 'var(--text-secondary-light)', fontSize: 15 }}>
-            Welcome back, {user?.name}! Manage your courses below.
-          </p>
+    <div className="space-y-12 pb-20">
+      {/* Header Section */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-brand-primary mb-1">
+             <BarChart2 size={16} />
+             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Instructor Portal</span>
+          </div>
+          <h1 className="text-4xl lg:text-5xl font-black text-white">Console</h1>
+          <p className="text-slate-400">Manage your curiculum and student engagement from one premium interface.</p>
         </div>
         <button
-          className="btn btn-primary"
+          className="premium-button flex items-center gap-3"
           onClick={() => navigate('/instructor/create-course')}
-          id="create-course-btn"
         >
-          <Plus size={18} /> Create New Course
+          <Plus size={20} /> Create New Course
         </button>
-      </motion.div>
+      </header>
 
-      {/* Stats */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16, marginBottom: 32 }}>
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="card-flat" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon size={22} color={color} />
+          <motion.div
+            key={label}
+            whileHover={{ y: -5 }}
+            className="glass-panel p-8 rounded-[2.5rem] flex items-center gap-6 border-white/5"
+          >
+            <div className={`w-16 h-16 rounded-2xl ${bg} flex items-center justify-center`}>
+              <Icon className={`w-8 h-8 ${color}`} />
             </div>
             <div>
-              <div style={{ fontSize: 24, fontWeight: 800 }}>{value}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary-light)' }}>{label}</div>
+              <p className="text-3xl font-black text-white leading-none mb-1">{value}</p>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{label}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Courses list */}
-      <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Your Courses</h2>
-
-      {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-          {[1, 2, 3].map((n) => <SkeletonCard key={n} />)}
+      {/* Courses Section */}
+      <section className="space-y-8">
+        <div className="flex items-center justify-between px-2">
+            <h2 className="text-2xl font-black text-white">Your Courses</h2>
+            <div className="h-px flex-1 bg-white/5 mx-8 hidden md:block" />
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                Showing {courses.length} Results
+            </p>
         </div>
-      ) : courses.length > 0 ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-          {courses.map((course) => (
-            <motion.div key={course._id} className="card" style={{ overflow: 'hidden' }}
-              whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
-              <img
-                src={course.thumbnail}
-                alt={course.title}
-                className="course-thumbnail"
-                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80' }}
-              />
-              <div style={{ padding: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                  <div>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, lineHeight: 1.3 }}>{course.title}</h3>
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 999, background: 'rgba(99,102,241,0.1)', color: '#6366F1' }}>
-                      {course.category}
-                    </span>
+
+        {courses.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {courses.map((course) => (
+              <motion.div 
+                key={course._id} 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="glass-panel group p-6 rounded-[2.5rem] flex flex-col sm:flex-row gap-6 hover:bg-white/5 transition-all border-white/5"
+              >
+                <div className="relative w-full sm:w-48 h-32 rounded-3xl overflow-hidden shadow-2xl shadow-black/40 flex-shrink-0">
+                  <img src={course.thumbnail} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-brand-primary/20 backdrop-blur-md text-[10px] font-bold text-brand-primary border border-brand-primary/20">
+                    {course.category}
                   </div>
                 </div>
 
-                <p style={{ fontSize: 13, color: 'var(--text-secondary-light)', marginTop: 10, marginBottom: 16, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {course.description}
-                </p>
+                <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-2 truncate group-hover:text-brand-primary transition-colors">{course.title}</h3>
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed h-8">
+                        {course.description || 'No description provided.'}
+                    </p>
+                  </div>
 
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    className="btn btn-outline btn-sm"
-                    onClick={() => navigate(`/instructor/courses/${course._id}/lessons`)}
-                    id={`manage-lessons-${course._id}`}
-                    style={{ flex: 1 }}
-                  >
-                    <BookOpen size={14} /> Lessons
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => navigate(`/instructor/edit-course/${course._id}`)}
-                    id={`edit-course-${course._id}`}
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => handleDelete(course._id, course.title)}
-                    id={`delete-course-${course._id}`}
-                    style={{ color: '#EF4444' }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <div className="flex items-center gap-2 mt-6">
+                    <button
+                      className="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-primary/10 border border-white/5 hover:border-brand-primary/30 text-slate-300 hover:text-brand-primary py-3 rounded-2xl text-xs font-bold transition-all active:scale-95"
+                      onClick={() => navigate(`/instructor/courses/${course._id}/lessons`)}
+                    >
+                      <BookOpen size={14} /> Manage Content
+                    </button>
+                    <button
+                      className="p-3 bg-white/5 hover:bg-slate-700 border border-white/5 rounded-2xl text-slate-400 hover:text-white transition-all active:scale-95"
+                      onClick={() => navigate(`/instructor/edit-course/${course._id}`)}
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                    <button
+                      className="p-3 bg-rose-500/5 hover:bg-rose-500 border border-white/5 hover:border-rose-500 rounded-2xl text-rose-500 hover:text-white transition-all active:scale-95"
+                      onClick={() => handleDelete(course._id, course.title)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      ) : (
-        <div className="empty-state">
-          <div className="empty-state-icon"><BookOpen size={36} color="#6366F1" /></div>
-          <h3 style={{ fontSize: 18, fontWeight: 700 }}>No courses yet</h3>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary-light)' }}>Create your first course to get started</p>
-          <button className="btn btn-primary" onClick={() => navigate('/instructor/create-course')} id="first-course-btn">
-            <Plus size={18} /> Create Your First Course
-          </button>
-        </div>
-      )}
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="glass-panel border-dashed border-white/10 rounded-[3rem] p-20 text-center space-y-8">
+            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+               <Layers size={48} className="text-slate-700" />
+            </div>
+            <div className="max-w-sm mx-auto space-y-3">
+              <h3 className="text-2xl font-bold text-white">No active courses</h3>
+              <p className="text-slate-400">You haven't published any courses yet. Start by creating a course to reach your first students.</p>
+            </div>
+            <button 
+              className="premium-button inline-flex items-center gap-3"
+              onClick={() => navigate('/instructor/create-course')}
+            >
+              <Plus size={20} /> Launch Your First Course
+            </button>
+          </div>
+        )}
+      </section>
+      
+      {/* Tips / Insights Footer */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
+          <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-brand-primary/10 to-transparent border border-brand-primary/20 flex gap-6">
+            <div className="w-12 h-12 bg-brand-primary rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-primary/30">
+                <BarChart2 className="text-white" size={24} />
+            </div>
+            <div className="space-y-2">
+                <h4 className="text-lg font-bold text-white">Optimize Course Visibility</h4>
+                <p className="text-sm text-slate-400 leading-relaxed">Ensure your course titles include popular technology keywords to appear in more student search results.</p>
+            </div>
+          </div>
+          <div className="p-8 rounded-[3rem] bg-white/5 border border-white/5 flex gap-6">
+            <div className="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-green-500/30">
+                <Users className="text-white" size={24} />
+            </div>
+            <div className="space-y-2">
+                <h4 className="text-lg font-bold text-white">Student Feedback</h4>
+                <p className="text-sm text-slate-400 leading-relaxed">Early reviews increase conversion rates by 40%. Ask your first batch of students for honest feedback.</p>
+            </div>
+          </div>
+      </div>
     </div>
   )
 }

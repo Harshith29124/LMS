@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
 import { lessonAPI, quizAPI, courseAPI } from '../services/api'
 import Modal from '../components/Modal'
-import { ArrowLeft, Plus, Trash2, Edit3, HelpCircle, CheckCircle, Video, FileText } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, HelpCircle, CheckCircle, Video, FileText, ChevronRight, Clock, Hash, Layout } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function ManageLessonsPage() {
@@ -32,7 +32,7 @@ export default function ManageLessonsPage() {
         setCourse(courseRes.data)
         setLessons(lessonsRes.data || [])
       } catch {
-        toast.error('Failed to load data')
+        toast.error('Failed to load asset index')
       } finally {
         setLoading(false)
       }
@@ -42,251 +42,255 @@ export default function ManageLessonsPage() {
 
   const handleAddLesson = async (e) => {
     e.preventDefault()
-    if (!lessonForm.title.trim()) return toast.error('Lesson title required')
+    if (!lessonForm.title.trim()) return toast.error('Asset identity required')
     setSubmitting(true)
     try {
       const res = await lessonAPI.create(courseId, { ...lessonForm, order: lessons.length })
       setLessons((prev) => [...prev, res.data])
       setLessonModal(false)
       setLessonForm({ title: '', content: '', videoUrl: '', order: 0, duration: '10 min' })
-      toast.success('Lesson added!')
+      toast.success('Asset integrated into curiculum')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add lesson')
+      toast.error(err.response?.data?.message || 'Failed to sync asset')
     } finally {
       setSubmitting(false)
     }
   }
 
   const handleDeleteLesson = async (lessonId) => {
-    if (!window.confirm('Delete this lesson?')) return
+    if (!window.confirm('Are you sure you want to decouple this asset from the curiculum?')) return
     try {
       await lessonAPI.delete(lessonId)
       setLessons((prev) => prev.filter((l) => l._id !== lessonId))
-      toast.success('Lesson deleted')
+      toast.success('Asset removed successfully')
     } catch {
-      toast.error('Failed to delete lesson')
+      toast.error('Failed to delete asset')
     }
   }
 
   const handleAddQuiz = async (e) => {
     e.preventDefault()
-    if (!quizForm.question.trim()) return toast.error('Question required')
-    if (quizForm.options.some((o) => !o.trim())) return toast.error('All 4 options required')
-    if (!quizForm.correctAnswer) return toast.error('Select the correct answer')
+    if (!quizForm.question.trim()) return toast.error('Knowledge check requires a question')
+    if (quizForm.options.some((o) => !o.trim())) return toast.error('Four-option set is mandatory')
+    if (!quizForm.correctAnswer) return toast.error('Designate a valid key')
     setSubmitting(true)
     try {
       await quizAPI.create(selectedLesson._id, quizForm)
       setQuizModal(false)
       setQuizForm({ question: '', options: ['', '', '', ''], correctAnswer: '' })
-      toast.success('Quiz created!')
+      toast.success('Knowledge check initialized')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create quiz')
+      toast.error(err.response?.data?.message || 'Failed to register quiz data')
     } finally {
       setSubmitting(false)
     }
   }
 
-  const optionLabels = ['A', 'B', 'C', 'D']
+  if (loading) return (
+    <div className="space-y-6 animate-pulse">
+        <div className="h-20 glass-panel rounded-3xl" />
+        {[1,2,3,4].map(i => <div key={i} className="h-24 glass-panel rounded-[2rem]" />)}
+    </div>
+  )
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ maxWidth: 800, margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/instructor')} id="back-to-instructor">
-          <ArrowLeft size={16} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>Manage Lessons</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary-light)' }}>{course?.title}</p>
+    <div className="max-w-4xl mx-auto space-y-10 pb-20">
+      {/* Dynamic Header */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-2">
+        <div className="flex items-center gap-6 min-w-0">
+            <button 
+              className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 text-slate-400 hover:text-white transition-all active:scale-95" 
+              onClick={() => navigate('/instructor')}
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-3xl font-black text-white truncate">Curriculum Console</h1>
+              <p className="text-brand-primary text-[10px] font-black uppercase tracking-[0.2em]">{course?.title}</p>
+            </div>
         </div>
         <button
-          className="btn btn-primary"
+          className="premium-button flex items-center gap-3 whitespace-nowrap"
           onClick={() => setLessonModal(true)}
-          id="add-lesson-btn"
         >
-          <Plus size={16} /> Add Lesson
+          <Plus size={20} /> Deploy New Asset
         </button>
-      </div>
+      </header>
 
-      {/* Lessons */}
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="skeleton" style={{ height: 80, borderRadius: 12 }} />
-          ))}
-        </div>
-      ) : lessons.length > 0 ? (
-        <AnimatePresence mode="popLayout">
-          {lessons.map((lesson, index) => (
-            <motion.div
-              key={lesson._id}
-              layout
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="card-flat"
-              style={{ padding: 20, marginBottom: 12 }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: 'rgba(99,102,241,0.1)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0, fontWeight: 800, color: '#6366F1', fontSize: 14,
-                }}>
-                  {index + 1}
+      {/* Assets Integrated List */}
+      <div className="space-y-4">
+        {lessons.length > 0 ? (
+          <AnimatePresence mode="popLayout">
+            {lessons.map((lesson, index) => (
+              <motion.div
+                key={lesson._id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="glass-panel group p-6 rounded-[2.5rem] flex items-center gap-6 border-white/5 hover:bg-white/5 transition-all"
+              >
+                <div className="w-14 h-14 bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 rounded-[1.25rem] border border-white/5 flex items-center justify-center flex-shrink-0 group-hover:border-brand-primary/20 transition-all">
+                  <span className="text-xl font-black text-brand-primary">{String(index + 1).padStart(2, '0')}</span>
                 </div>
-                <div style={{ flex: 1, overflow: 'hidden' }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{lesson.title}</h3>
-                  <div style={{ display: 'flex', gap: 12 }}>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xl font-bold text-white group-hover:text-brand-primary transition-colors truncate">{lesson.title}</h3>
+                  <div className="flex flex-wrap items-center gap-6 mt-1">
                     {lesson.videoUrl && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-secondary-light)' }}>
-                        <Video size={12} /> Has Video
+                      <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-300">
+                        <Video size={12} className="text-brand-primary" /> Visual Module
                       </span>
                     )}
                     {lesson.content && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-secondary-light)' }}>
-                        <FileText size={12} /> Has Content
+                      <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-300">
+                        <FileText size={12} className="text-brand-secondary" /> Documentation
                       </span>
                     )}
-                    <span style={{ fontSize: 12, color: 'var(--text-secondary-light)' }}>{lesson.duration}</span>
+                    <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600">
+                      <Clock size={12} /> {lesson.duration || '10 min'}
+                    </span>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 6 }}>
+
+                <div className="flex items-center gap-2">
                   <button
-                    className="btn btn-outline btn-sm"
+                    className="p-3 bg-white/5 hover:bg-brand-primary/20 border border-white/5 hover:border-brand-primary/30 rounded-2xl text-slate-400 hover:text-brand-primary transition-all active:scale-95 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.15)]"
                     onClick={() => { setSelectedLesson(lesson); setQuizModal(true) }}
-                    id={`add-quiz-${lesson._id}`}
-                    title="Add quiz"
+                    title="Design Assessment"
                   >
-                    <HelpCircle size={14} /> Quiz
+                    <HelpCircle size={18} />
                   </button>
                   <button
-                    className="btn btn-ghost btn-sm"
+                    className="p-3 bg-rose-500/5 hover:bg-rose-500 border border-white/5 hover:border-rose-500 rounded-2xl text-rose-500 hover:text-white transition-all active:scale-95"
                     onClick={() => handleDeleteLesson(lesson._id)}
-                    id={`delete-lesson-${lesson._id}`}
-                    style={{ color: '#EF4444' }}
-                    title="Delete lesson"
+                    title="De-sync Asset"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      ) : (
-        <div className="empty-state">
-          <div className="empty-state-icon"><FileText size={36} color="#6366F1" /></div>
-          <h3 style={{ fontSize: 18, fontWeight: 700 }}>No lessons yet</h3>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary-light)' }}>Add your first lesson to get started</p>
-          <button className="btn btn-primary" onClick={() => setLessonModal(true)} id="first-lesson-btn">
-            <Plus size={16} /> Add First Lesson
-          </button>
-        </div>
-      )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        ) : (
+          <div className="glass-panel border-dashed border-white/10 rounded-[3rem] p-20 text-center space-y-8">
+            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto text-slate-600">
+               <Layout size={48} />
+            </div>
+            <div className="max-w-xs mx-auto space-y-2">
+              <h3 className="text-2xl font-bold text-white">Curriculum Empty</h3>
+              <p className="text-slate-500">Every module starts with a single asset. Deploy your first lesson now.</p>
+            </div>
+            <button 
+                onClick={() => setLessonModal(true)}
+                className="premium-button"
+            >
+              Add First Module
+            </button>
+          </div>
+        )}
+      </div>
 
-      {/* Add Lesson Modal */}
-      <Modal open={lessonModal} onClose={() => setLessonModal(false)} title="Add New Lesson">
-        <form onSubmit={handleAddLesson} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="lesson-title">Lesson Title *</label>
+      {/* Asset Deployment Modal */}
+      <Modal open={lessonModal} onClose={() => setLessonModal(false)} title="Module Deployment">
+        <form onSubmit={handleAddLesson} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 flex items-center gap-2">
+               <Type size={12} /> Module Identity
+            </label>
             <input
-              id="lesson-title"
               type="text"
-              className="form-input"
-              placeholder="e.g. Introduction to React Hooks"
+              className="input-field text-base font-bold"
+              placeholder="e.g. Architecture Principles of React"
               value={lessonForm.title}
               onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
               required
             />
           </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="lesson-video">Video URL (YouTube, Vimeo, etc.)</label>
-            <input
-              id="lesson-video"
-              type="url"
-              className="form-input"
-              placeholder="https://youtube.com/watch?v=..."
-              value={lessonForm.videoUrl}
-              onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
-            />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 flex items-center gap-2">
+                   <Video size={12} /> Visual Link
+                </label>
+                <input
+                    type="url"
+                    className="input-field text-xs py-3"
+                    placeholder="YouTube/Vimeo Source URL"
+                    value={lessonForm.videoUrl}
+                    onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
+                />
+            </div>
+             <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 flex items-center gap-2">
+                   <Clock size={12} /> Expected Duration
+                </label>
+                <input
+                    type="text"
+                    className="input-field text-xs py-3"
+                    placeholder="e.g. 15:00 min"
+                    value={lessonForm.duration}
+                    onChange={(e) => setLessonForm({ ...lessonForm, duration: e.target.value })}
+                />
+            </div>
           </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="lesson-content">Lesson Content (Markdown)</label>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 flex items-center gap-2">
+               <Hash size={12} /> Technical Documentation (Markdown)
+            </label>
             <textarea
-              id="lesson-content"
-              className="form-input"
-              placeholder="# Lesson Content&#10;&#10;Write content in **Markdown** format..."
+              className="input-field min-h-[160px] text-sm font-mono leading-relaxed"
+              placeholder="# Implementation Details&#10;Describe technical specs or core concepts..."
               value={lessonForm.content}
               onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
-              style={{ minHeight: 120 }}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="lesson-duration">Duration</label>
-            <input
-              id="lesson-duration"
-              type="text"
-              className="form-input"
-              placeholder="e.g. 15 min"
-              value={lessonForm.duration}
-              onChange={(e) => setLessonForm({ ...lessonForm, duration: e.target.value })}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setLessonModal(false)}>
-              Cancel
+
+          <div className="flex gap-4 pt-4">
+            <button type="button" className="flex-1 px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 font-bold transition-all active:scale-95" onClick={() => setLessonModal(false)}>
+              Discard
             </button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={submitting} id="submit-lesson-btn">
-              {submitting ? 'Adding...' : 'Add Lesson'}
+            <button type="submit" className="flex-[2] premium-button" disabled={submitting}>
+              {submitting ? 'Syncing...' : 'Deploy Module'}
             </button>
           </div>
         </form>
       </Modal>
 
-      {/* Add Quiz Modal */}
-      <Modal open={quizModal} onClose={() => setQuizModal(false)} title={`Add Quiz: ${selectedLesson?.title || ''}`} maxWidth={580}>
-        <form onSubmit={handleAddQuiz} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="quiz-question">Question *</label>
+      {/* Assessment Design Modal */}
+      <Modal open={quizModal} onClose={() => setQuizModal(false)} title={`Assessment: ${selectedLesson?.title}`} maxWidth={600}>
+        <form onSubmit={handleAddQuiz} className="space-y-8">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Critical Question</label>
             <textarea
-              id="quiz-question"
-              className="form-input"
-              placeholder="e.g. What is the purpose of the useState hook?"
+              className="input-field min-h-[100px] text-lg font-bold leading-tight"
+              placeholder="Design a question that validates comprehension..."
               value={quizForm.question}
               onChange={(e) => setQuizForm({ ...quizForm, question: e.target.value })}
               required
-              style={{ minHeight: 80 }}
             />
           </div>
-          <div>
-            <label className="form-label" style={{ marginBottom: 10, display: 'block' }}>Options (select correct answer)</label>
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 block mb-2">Option Set & Calibration</label>
+            {['A', 'B', 'C', 'D'].map((label, i) => (
+              <div key={label} className="flex items-center gap-4 group">
                 <button
                   type="button"
                   onClick={() => setQuizForm({ ...quizForm, correctAnswer: quizForm.options[i] })}
-                  id={`correct-option-${i}`}
-                  style={{
-                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                    border: `2px solid ${quizForm.correctAnswer === quizForm.options[i] && quizForm.options[i] ? '#22C55E' : 'var(--border-light)'}`,
-                    background: quizForm.correctAnswer === quizForm.options[i] && quizForm.options[i] ? '#22C55E' : 'transparent',
-                    color: quizForm.correctAnswer === quizForm.options[i] && quizForm.options[i] ? 'white' : 'var(--text-secondary-light)',
-                    cursor: 'pointer', fontWeight: 700, fontSize: 13,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'all 0.2s',
-                  }}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center font-black transition-all active:scale-90 flex-shrink-0 border-2 ${
+                    quizForm.correctAnswer === quizForm.options[i] && quizForm.options[i] 
+                      ? 'bg-green-500 border-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.3)]' 
+                      : 'bg-white/5 border-white/5 text-slate-600 hover:border-brand-primary/30 group-hover:text-brand-primary'
+                  }`}
                 >
-                  {quizForm.correctAnswer === quizForm.options[i] && quizForm.options[i]
-                    ? <CheckCircle size={16} />
-                    : optionLabels[i]
-                  }
+                  {quizForm.correctAnswer === quizForm.options[i] && quizForm.options[i] ? <CheckCircle size={20} /> : label}
                 </button>
                 <input
                   type="text"
-                  className="form-input"
-                  placeholder={`Option ${optionLabels[i]}`}
+                  className="input-field py-3 text-sm font-bold"
+                  placeholder={`Distractor Option ${label}`}
                   value={quizForm.options[i]}
                   onChange={(e) => {
                     const newOpts = [...quizForm.options]
@@ -302,20 +306,21 @@ export default function ManageLessonsPage() {
                 />
               </div>
             ))}
-            <p style={{ fontSize: 12, color: 'var(--text-secondary-light)', marginTop: 4 }}>
-              Click the label button on the left to mark the correct answer
+            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest text-center pt-4 italic">
+              * Click the letter circle to mark the correct validation key
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setQuizModal(false)}>
-              Cancel
+
+          <div className="flex gap-4">
+            <button type="button" className="flex-1 px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 font-bold transition-all active:scale-95" onClick={() => setQuizModal(false)}>
+              Discard
             </button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={submitting} id="submit-quiz-btn">
-              {submitting ? 'Saving...' : 'Save Quiz'}
+            <button type="submit" className="flex-[2] premium-button" disabled={submitting}>
+              {submitting ? 'Registering...' : 'Seal Knowledge Check'}
             </button>
           </div>
         </form>
       </Modal>
-    </motion.div>
+    </div>
   )
 }

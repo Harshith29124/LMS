@@ -1,12 +1,9 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle, XCircle, HelpCircle } from 'lucide-react'
+import { CheckCircle, XCircle, HelpCircle, Sparkles, ChevronRight } from 'lucide-react'
 import { quizAPI } from '../services/api'
 import toast from 'react-hot-toast'
 
-/**
- * QuizCard - displays a quiz for a lesson and handles submission
- */
 export default function QuizCard({ quiz, onComplete }) {
   const [selected, setSelected] = useState(null)
   const [result, setResult] = useState(null)
@@ -17,135 +14,114 @@ export default function QuizCard({ quiz, onComplete }) {
   const optionLabels = ['A', 'B', 'C', 'D']
 
   const handleSubmit = async () => {
-    if (!selected) return toast.error('Please select an answer')
+    if (!selected) return toast.error('Selection required')
     setSubmitting(true)
     try {
       const { data } = await quizAPI.submit({ quizId: quiz._id, selectedAnswer: selected })
       setResult(data)
       onComplete?.()
     } catch (err) {
-      toast.error('Failed to submit quiz')
+      toast.error('Sync error during quiz validation')
     } finally {
       setSubmitting(false)
     }
   }
 
-  const getOptionClass = (opt) => {
-    if (!result) return selected === opt ? 'quiz-option selected' : 'quiz-option'
-    if (opt === result.correctAnswer) return 'quiz-option correct'
-    if (opt === selected && !result.isCorrect) return 'quiz-option wrong'
-    return 'quiz-option'
-  }
-
   return (
     <motion.div
-      className="card-flat"
-      style={{ padding: 24 }}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="glass-panel p-8 lg:p-10 rounded-[3rem] border-brand-primary/10 shadow-2xl relative overflow-hidden"
     >
+      <div className="absolute top-0 right-0 w-40 h-40 bg-brand-primary/5 rounded-full blur-3xl -mr-20 -mt-20" />
+
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: 'rgba(99,102,241,0.12)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <HelpCircle size={20} color="#6366F1" />
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center border border-brand-primary/20">
+          <HelpCircle size={24} className="text-brand-primary" />
         </div>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#6366F1', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Quiz
-          </div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary-light)' }}>
-            Test your knowledge
-          </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Knowledge Check</p>
+          <h3 className="text-lg font-black text-white">Validation Module</h3>
         </div>
       </div>
 
       {/* Question */}
-      <p style={{ fontSize: 17, fontWeight: 700, marginBottom: 20, lineHeight: 1.4, color: 'var(--text-primary-light)' }}>
-        {quiz.question}
-      </p>
+      <h4 className="text-xl md:text-2xl font-black text-white mb-10 leading-relaxed italic">
+        "{quiz.question}"
+      </h4>
 
       {/* Options */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-        {quiz.options.map((opt, i) => (
-          <button
-            key={opt}
-            className={getOptionClass(opt)}
-            onClick={() => !result && setSelected(opt)}
-            disabled={!!result}
-            id={`quiz-option-${i}`}
-          >
-            <span style={{
-              width: 28, height: 28, borderRadius: 8,
-              background: selected === opt && !result
-                ? '#6366F1'
-                : result && opt === result.correctAnswer
-                  ? '#22C55E'
-                  : result && opt === selected && !result.isCorrect
-                    ? '#EF4444'
-                    : 'rgba(100,116,139,0.12)',
-              color: (selected === opt && !result) || (result && (opt === result.correctAnswer || (opt === selected && !result.isCorrect)))
-                ? 'white' : 'var(--text-secondary-light)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, fontSize: 13, flexShrink: 0,
-              transition: 'all 0.2s',
-            }}>
-              {optionLabels[i]}
-            </span>
-            <span style={{ flex: 1, textAlign: 'left' }}>{opt}</span>
-            {result && opt === result.correctAnswer && <CheckCircle size={18} color="#22C55E" />}
-            {result && opt === selected && !result.isCorrect && opt === selected && <XCircle size={18} color="#EF4444" />}
-          </button>
-        ))}
+      <div className="space-y-4 mb-10">
+        {quiz.options.map((opt, i) => {
+          const isCorrect = result && opt === result.correctAnswer
+          const isWrong = result && opt === selected && !result.isCorrect
+          const isSelected = selected === opt
+
+          return (
+            <button
+              key={opt}
+              onClick={() => !result && setSelected(opt)}
+              disabled={!!result}
+              className={`w-full p-5 rounded-2xl flex items-center gap-6 border-2 transition-all text-left group ${
+                !result 
+                  ? isSelected 
+                    ? 'bg-brand-primary/10 border-brand-primary text-white' 
+                    : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10'
+                  : isCorrect
+                    ? 'bg-green-500/10 border-green-500 text-green-500'
+                    : isWrong
+                      ? 'bg-rose-500/10 border-rose-500 text-rose-500'
+                      : 'bg-white/5 border-white/5 text-slate-600 opacity-50'
+              }`}
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black transition-colors ${
+                !result
+                  ? isSelected ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/30' : 'bg-surface-800 text-slate-500 group-hover:text-white'
+                  : isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-rose-500 text-white' : 'bg-surface-900 text-slate-700'
+              }`}>
+                {isCorrect ? <CheckCircle size={18} /> : isWrong ? <XCircle size={18} /> : optionLabels[i]}
+              </div>
+              <span className="flex-1 font-bold text-base md:text-lg">{opt}</span>
+              {isSelected && !result && <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse shadow-[0_0_10px_rgb(99,102,241)]" />}
+            </button>
+          )
+        })}
       </div>
 
-      {/* Submit / Result */}
+      {/* Submission Actions */}
       <AnimatePresence mode="wait">
         {!result ? (
           <motion.button
             key="submit"
-            className="btn btn-primary"
-            style={{ width: '100%' }}
             onClick={handleSubmit}
             disabled={!selected || submitting}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            id="quiz-submit-btn"
+            className="premium-button w-full flex items-center justify-center gap-3 group"
           >
-            {submitting ? 'Submitting...' : 'Submit Answer'}
+            <Sparkles size={18} className="fill-current" />
+            <span className="uppercase tracking-widest text-xs font-black">{submitting ? 'Verifying...' : 'Validate Answer'}</span>
+            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </motion.button>
         ) : (
           <motion.div
             key="result"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            style={{
-              padding: '16px 20px',
-              borderRadius: 12,
-              background: result.isCorrect ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-              border: `1.5px solid ${result.isCorrect ? '#22C55E' : '#EF4444'}`,
-              display: 'flex', alignItems: 'center', gap: 12,
-            }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-6 rounded-[2rem] flex items-center gap-4 ${
+              result.isCorrect ? 'bg-green-500/10 border border-green-500/20' : 'bg-rose-500/10 border border-rose-500/20'
+            }`}
           >
-            {result.isCorrect
-              ? <CheckCircle size={24} color="#22C55E" />
-              : <XCircle size={24} color="#EF4444" />
-            }
-            <div>
-              <div style={{ fontWeight: 700, color: result.isCorrect ? '#16A34A' : '#DC2626', fontSize: 15 }}>
-                {result.isCorrect ? '🎉 Correct!' : '❌ Incorrect'}
-              </div>
-              {!result.isCorrect && (
-                <div style={{ fontSize: 13, color: 'var(--text-secondary-light)', marginTop: 2 }}>
-                  Correct answer: <strong>{result.correctAnswer}</strong>
-                </div>
-              )}
-            </div>
+             <div className={`w-12 h-12 rounded-full flex items-center justify-center ${result.isCorrect ? 'bg-green-500 text-white' : 'bg-rose-500 text-white'}`}>
+                {result.isCorrect ? <CheckCircle size={24} /> : <XCircle size={24} />}
+             </div>
+             <div>
+                <p className={`text-sm font-black uppercase tracking-widest ${result.isCorrect ? 'text-green-500' : 'text-rose-500'}`}>
+                    {result.isCorrect ? 'Validation Passed' : 'Validation Failed'}
+                </p>
+                <p className="text-xs text-slate-400 font-bold">
+                    {result.isCorrect ? 'Knowledge synchronized successfully.' : `Correct sequence: ${result.correctAnswer}`}
+                </p>
+             </div>
           </motion.div>
         )}
       </AnimatePresence>

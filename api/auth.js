@@ -4,20 +4,21 @@ import { cors, generateToken, authenticate } from './config/middleware.js';
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
-
   const url = req.url.split('?')[0];
 
   try {
     // POST /api/auth/signup
     if (url.includes('/signup') && req.method === 'POST') {
       const { name, email, password, role = 'learner' } = req.body;
-      if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: 'Identity credentials incomplete' });
+      }
       
       const normalizedEmail = email.toLowerCase().trim();
       const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
       
       if (existing.length > 0) {
-        return res.status(409).json({ message: 'Email already registered' });
+        return res.status(409).json({ message: 'Identity Conflict: Email already registered in system' });
       }
 
       const hashed = await bcrypt.hash(password, 12);
@@ -40,20 +41,22 @@ export default async function handler(req, res) {
     // POST /api/auth/login
     if (url.includes('/login') && req.method === 'POST') {
       const { email, password } = req.body;
-      if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Auth sequence requires email and password' });
+      }
 
       const normalizedEmail = email.toLowerCase().trim();
       const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [normalizedEmail]);
       
       if (rows.length === 0) {
-        return res.status(401).json({ message: 'User not found. Please sign up first.' });
+        return res.status(401).json({ message: 'Subject not found. Please initialize registration first.' });
       }
 
       const user = rows[0];
       const match = await bcrypt.compare(password, user.password);
       
       if (!match) {
-        return res.status(401).json({ message: 'Invalid email or password' });
+        return res.status(401).json({ message: 'Invalid credentials. Access denied.' });
       }
 
       const token = generateToken(user.id);
@@ -73,7 +76,7 @@ export default async function handler(req, res) {
       if (!decoded) return;
       
       const [rows] = await db.query('SELECT id, name, email, role FROM users WHERE id = ?', [decoded.id]);
-      if (rows.length === 0) return res.status(404).json({ message: 'User profile not found' });
+      if (rows.length === 0) return res.status(404).json({ message: 'Identity profile decoupled or missing' });
       
       const user = rows[0];
       return res.status(200).json({ 
@@ -83,9 +86,9 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(404).json({ message: `Auth endpoint not found: ${url}` });
+    return res.status(404).json({ message: `Kernel Notification: Auth endpoint ${url} is offline` });
   } catch (err) {
     console.error('[API AUTH ERROR]', err);
-    return res.status(500).json({ message: 'Internal Server Error', error: err.message });
+    return res.status(500).json({ message: 'Internal Kernel Fault', error: err.message });
   }
 }

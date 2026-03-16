@@ -3,41 +3,25 @@
   "framework": "vite",
   "name": "craftconnect-lms",
   "rewrites": [
-    {
-      "source": "/api/auth/(.*)",
-      "destination": "/api/auth.js"
-    },
-    {
-      "source": "/api/courses/(.*)",
-      "destination": "/api/courses.js"
-    },
-    {
-      "source": "/api/lessons/(.*)",
-      "destination": "/api/lessons.js"
-    },
-    {
-      "source": "/api/quiz/(.*)",
-      "destination": "/api/quiz.js"
-    },
-    {
-      "source": "/api/enroll/(.*)",
-      "destination": "/api/enrollment.js"
-    },
-    {
-      "source": "/api/progress/(.*)",
-      "destination": "/api/enrollment.js"
-    },
-    {
-      "source": "/api/courses",
-      "destination": "/api/courses.js"
-    },
-    {
-      "source": "/api/courses/",
-      "destination": "/api/courses.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/auth/(.*)", "destination": "/api/auth.js" },
+    { "source": "/api/auth", "destination": "/api/auth.js" },
+    
+    { "source": "/api/courses/(.*)", "destination": "/api/courses.js" },
+    { "source": "/api/courses", "destination": "/api/courses.js" },
+    
+    { "source": "/api/lessons/(.*)", "destination": "/api/lessons.js" },
+    { "source": "/api/lessons", "destination": "/api/lessons.js" },
+    
+    { "source": "/api/quiz/(.*)", "destination": "/api/quiz.js" },
+    { "source": "/api/quiz", "destination": "/api/quiz.js" },
+    
+    { "source": "/api/enrollment/(.*)", "destination": "/api/enrollment.js" },
+    { "source": "/api/enrollment", "destination": "/api/enrollment.js" },
+    { "source": "/api/enroll/(.*)", "destination": "/api/enrollment.js" },
+    { "source": "/api/enroll", "destination": "/api/enrollment.js" },
+    { "source": "/api/progress/(.*)", "destination": "/api/enrollment.js" },
+    { "source": "/api/progress", "destination": "/api/enrollment.js" },
+
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
