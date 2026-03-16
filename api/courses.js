@@ -67,56 +67,64 @@ const SEEDED_COURSES = [
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
-  const url = req.url.split('?')[0];
+  
+  const rawUrl = req.url || '';
+  const urlPath = rawUrl.split('?')[0];
+  
+  // Extract ID from query or URL params (manual parse for safety)
+  const urlParams = new URLSearchParams(rawUrl.split('?')[1] || '');
+  const id = req.query?.id || urlParams.get('id');
 
   try {
-    // GET /api/courses
-    if ((url === '/api/courses' || url === '/api/courses/') && req.method === 'GET') {
-      let finalCourses = SEEDED_COURSES;
-      try {
-        const [rows] = await db.query(`
-          SELECT c.*, u.name as instructor_name, u.email as instructor_email 
-          FROM courses c 
-          JOIN users u ON u.id = c.instructor_id 
-          ORDER BY c.created_at DESC
-        `);
-        if (rows && rows.length > 0) finalCourses = rows;
-      } catch (e) {
-        console.warn('DB Fetch failed, serving static data');
-      }
+    // ─── SINGLE COURSE VIEW ──────────────────────────
+    if (urlPath.includes('/get') || id) {
+       if (id) {
+          try {
+            const [rows] = await db.query(`
+              SELECT c.*, u.name as instructor_name, u.email as instructor_email 
+              FROM courses c 
+              JOIN users u ON u.id = c.instructor_id 
+              WHERE c.id = ?
+            `, [id]);
+            
+            if (rows && rows.length > 0) {
+              const r = rows[0];
+              return res.status(200).json({ ...r, id: r.id, _id: r.id, instructorId: { name: r.instructor_name } });
+            }
+          } catch (e) {
+            console.error('DB fetch single failed');
+          }
 
-      return res.status(200).json(finalCourses.map(r => ({
-        ...r,
-        id: r.id, _id: r.id,
-        instructorId: { name: r.instructor_name || 'Senior Instructor' }
-      })));
+          // Fallback if DB fails or course not in DB
+          const fb = SEEDED_COURSES.find(c => String(c.id) === String(id));
+          if (fb) return res.status(200).json({ ...fb, instructorId: { name: fb.instructor_name } });
+          
+          return res.status(404).json({ message: 'Course not found' });
+       }
     }
 
-    // GET /api/courses/get (Single)
-    if (url.includes('/get') && req.method === 'GET') {
-      const { id } = req.query;
-      try {
-        const [rows] = await db.query(`
-          SELECT c.*, u.name as instructor_name, u.email as instructor_email 
-          FROM courses c 
-          JOIN users u ON u.id = c.instructor_id 
-          WHERE c.id = ?
-        `, [id]);
-        if (rows.length > 0) {
-          const r = rows[0];
-          return res.status(200).json({ ...r, id: r.id, _id: r.id, instructorId: { name: r.instructor_name } });
-        }
-      } catch (e) {}
-
-      // Detailed Fallback
-      const fb = SEEDED_COURSES.find(c => String(c.id) === String(id));
-      if (fb) return res.status(200).json({ ...fb, instructorId: { name: fb.instructor_name } });
-      
-      return res.status(404).json({ message: 'Course not found' });
+    // ─── COURSE LIST VIEW ────────────────────────────
+    let finalCourses = SEEDED_COURSES;
+    try {
+      const [rows] = await db.query(`
+        SELECT c.*, u.name as instructor_name, u.email as instructor_email 
+        FROM courses c 
+        JOIN users u ON u.id = c.instructor_id 
+        ORDER BY c.created_at DESC
+      `);
+      if (rows && rows.length > 0) finalCourses = rows;
+    } catch (e) {
+      console.warn('DB Fetch list failed, using fallbacks');
     }
 
-    return res.status(404).json({ message: 'Not Found' });
+    return res.status(200).json(finalCourses.map(r => ({
+      ...r,
+      id: r.id, _id: r.id,
+      instructorId: { name: r.instructor_name || 'Senior Instructor' }
+    })));
+
   } catch (err) {
+    console.error('[API COURSE ERROR]', err);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
