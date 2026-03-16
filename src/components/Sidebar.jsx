@@ -1,8 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { motion } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, Compass, TrendingUp,
-  User, GraduationCap, PlusCircle, ChevronRight, X
+  User, GraduationCap, PlusCircle, ChevronRight, X, LogOut
 } from 'lucide-react'
 
 const navItems = {
@@ -32,97 +33,70 @@ export default function Sidebar({ open, onClose }) {
   }
 
   return (
-    <aside className={`sidebar ${open ? 'open' : ''}`}>
-      {/* Logo */}
-      <div style={{ padding: '20px 16px', borderBottom: '1px solid var(--border-light)' }} className="dark-border">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 36, height: 36,
-              background: 'linear-gradient(135deg, #6366F1, #22C55E)',
-              borderRadius: 10,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <GraduationCap size={20} color="white" />
+    <aside className={`fixed inset-y-0 left-0 z-50 w-72 transition-transform duration-500 transform lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className="h-full glass-panel border-r border-white/5 flex flex-col p-6 rounded-r-[3rem] lg:rounded-none">
+        {/* Logo */}
+        <div className="flex items-center justify-between mb-10 px-2">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-brand-primary/20 rotate-3">
+              <GraduationCap className="text-white w-7 h-7 -rotate-3" />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-primary-light)' }} className="dark-text">CraftConnect</div>
-              <div style={{ fontSize: 11, color: 'var(--text-secondary-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }} className="dark-text-muted">LMS</div>
+              <h1 className="text-xl font-black text-white leading-none">CraftConnect</h1>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">LMS Portal</span>
             </div>
           </div>
-          {/* Mobile close btn */}
-          <button onClick={onClose} className="btn btn-ghost btn-sm" style={{ display: 'none' }} id="sidebar-close-btn"
-            aria-label="Close sidebar">
-            <X size={18} />
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl lg:hidden text-slate-400">
+            <X size={20} />
           </button>
         </div>
-      </div>
 
-      {/* User profile mini */}
-      <div style={{ padding: '16px', borderBottom: '1px solid var(--border-light)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #6366F1, #818CF8)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'white', fontWeight: 700, fontSize: 14, flexShrink: 0,
-          }}>
-            {user?.name?.[0]?.toUpperCase() || 'U'}
-          </div>
-          <div style={{ overflow: 'hidden' }}>
-            <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary-light)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {user?.name}
+        {/* User Card */}
+        <div className="mb-10 px-2">
+          <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-4 group cursor-default">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 flex items-center justify-center border border-white/10 overflow-hidden">
+               <span className="text-lg font-black text-white">{user?.name?.[0]?.toUpperCase()}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary-light)', textTransform: 'capitalize' }}>
-              {user?.role}
+            <div className="flex-1 min-w-0">
+               <p className="font-bold text-white truncate">{user?.name}</p>
+               <p className="text-[10px] font-black uppercase tracking-widest text-brand-primary">{user?.role}</p>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <nav style={{ padding: '8px 0', flex: 1 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary-light)', padding: '8px 24px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Menu
-        </div>
-        {items.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/instructor' || to === '/dashboard'}
-            onClick={onClose}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        {/* Navigation */}
+        <nav className="flex-1 space-y-2">
+          <p className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Core Menu</p>
+          {items.map(({ to, icon: Icon, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/instructor' || to === '/dashboard'}
+              onClick={onClose}
+              className={({ isActive }) => `nav-link group ${isActive ? 'active' : ''}`}
+            >
+              <Icon size={20} className="group-hover:scale-110 transition-transform" />
+              <span className="flex-1">{label}</span>
+              <ChevronRight className={`transition-all duration-300 w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1`} />
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Action Footer */}
+        <div className="pt-6 border-t border-white/5 space-y-4">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-rose-400 font-bold hover:bg-rose-500/10 transition-all group active:scale-95"
           >
-            <Icon size={18} />
-            <span style={{ flex: 1 }}>{label}</span>
-            {({ isActive }) => isActive && <ChevronRight size={14} />}
-          </NavLink>
-        ))}
-      </nav>
+            <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <span>Sign Out</span>
+          </button>
 
-      {/* Logout */}
-      <div style={{ padding: '16px', borderTop: '1px solid var(--border-light)' }}>
-        <button onClick={handleLogout} className="btn btn-ghost" style={{ width: '100%', justifyContent: 'flex-start', color: '#EF4444' }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Log Out
-        </button>
+          <div className="p-4 rounded-2xl bg-brand-primary/10 border border-brand-primary/20">
+            <p className="text-[10px] font-bold text-brand-primary text-center">v1.2.0 PRODUCTION BUILD</p>
+          </div>
+        </div>
       </div>
-
-      <style>{`
-        @media (max-width: 1024px) {
-          #sidebar-close-btn { display: flex !important; }
-        }
-        .dark .sidebar { border-right-color: var(--border-dark); }
-        .dark .nav-item { color: var(--text-secondary-dark); }
-        .dark-border { border-bottom-color: var(--border-dark) !important; }
-        .dark .dark-border { border-bottom-color: var(--border-dark) !important; }
-        .dark .dark-text { color: var(--text-primary-dark) !important; }
-        .dark .dark-text-muted { color: var(--text-secondary-dark) !important; }
-      `}</style>
     </aside>
   )
 }

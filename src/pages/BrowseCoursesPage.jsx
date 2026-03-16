@@ -1,21 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Filter } from 'lucide-react'
+import { Search, Filter, Sparkles, BookCopy } from 'lucide-react'
 import { courseAPI, enrollmentAPI } from '../services/api'
 import CourseCard from '../components/CourseCard'
-import { SkeletonCard } from '../components/Skeleton'
 import toast from 'react-hot-toast'
 
 const CATEGORIES = ['All', 'Programming', 'Design', 'Business', 'Marketing', 'Data Science', 'DevOps', 'Other']
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
-}
-const item = {
-  hidden: { opacity: 0, scale: 0.95 },
-  show: { opacity: 1, scale: 1 },
-}
 
 export default function BrowseCoursesPage() {
   const [courses, setCourses] = useState([])
@@ -43,95 +33,108 @@ export default function BrowseCoursesPage() {
   }, [search, category])
 
   return (
-    <div>
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>Browse Courses</h1>
-        <p style={{ color: 'var(--text-secondary-light)', fontSize: 15 }}>
-          Discover {courses.length}+ courses from expert instructors
-        </p>
-      </motion.div>
+    <div className="space-y-12">
+      {/* Header with Search & Filter */}
+      <div className="relative glass-panel rounded-[3rem] p-10 lg:p-14 overflow-hidden border-white/5">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-[80px] -ml-32 -mt-32" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="space-y-4">
+            <h1 className="text-4xl lg:text-5xl font-black text-white">Browse Courses</h1>
+            <p className="text-slate-400 max-w-sm">Discover {courses.length}+ expert-led programs designed for your career transformation.</p>
+          </div>
 
-      {/* Search + Filter bar */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-        {/* Search */}
-        <div className="search-input" style={{ flex: 1, minWidth: 220, position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-          <input
-            id="browse-search"
-            type="text"
-            className="form-input"
-            placeholder="Search courses..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ paddingLeft: 40 }}
-          />
+          <div className="flex-1 max-w-xl flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+              <input
+                type="text"
+                placeholder="What do you want to learn?"
+                className="input-field pl-14"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            
+            <div className="relative min-w-[160px]">
+              <Filter className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+              <select
+                className="input-field pl-12 cursor-pointer appearance-none pr-10"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-surface-900">{cat}</option>)}
+              </select>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Category dropdown */}
-        <div style={{ position: 'relative' }}>
-          <Filter size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', zIndex: 1, pointerEvents: 'none' }} />
-          <select
-            id="browse-category"
-            className="form-input"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            style={{ paddingLeft: 36, paddingRight: 16, cursor: 'pointer' }}
-          >
-            {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
-        </div>
-      </motion.div>
-
-      {/* Category pills */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
-        style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+      {/* Category Pills */}
+      <div className="flex flex-wrap gap-3">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
             onClick={() => setCategory(cat)}
-            id={`category-pill-${cat}`}
-            style={{
-              padding: '6px 16px', borderRadius: 999,
-              fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              border: `1.5px solid ${category === cat ? '#6366F1' : 'var(--border-light)'}`,
-              background: category === cat ? 'rgba(99,102,241,0.1)' : 'transparent',
-              color: category === cat ? '#6366F1' : 'var(--text-secondary-light)',
-              transition: 'all 0.2s',
-            }}
+            className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 border ${
+              category === cat 
+                ? 'bg-brand-primary border-brand-primary text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]' 
+                : 'bg-white/5 border-white/10 text-slate-500 hover:text-white hover:border-white/20'
+            }`}
           >
             {cat}
           </button>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Courses grid */}
+      {/* Content */}
       {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-          {[1, 2, 3, 4, 5, 6].map((n) => <SkeletonCard key={n} />)}
+        <div className="course-grid">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="h-80 glass-panel rounded-[2.5rem] animate-pulse" />
+          ))}
         </div>
       ) : courses.length > 0 ? (
-        <motion.div
-          variants={container} initial="hidden" animate="show"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}
-        >
+        <div className="course-grid">
           {courses.map((course) => (
-            <motion.div key={course._id} variants={item}>
-              <CourseCard course={course} enrolled={enrolledIds.includes(course._id)} />
-            </motion.div>
+            <CourseCard 
+              key={course._id} 
+              course={course} 
+              enrolled={enrolledIds.includes(course._id)} 
+            />
           ))}
-        </motion.div>
+        </div>
       ) : (
-        <div className="empty-state">
-          <div className="empty-state-icon" style={{ fontSize: 40 }}>🔍</div>
-          <h3 style={{ fontSize: 18, fontWeight: 700 }}>No courses found</h3>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary-light)' }}>
-            Try a different search term or category
-          </p>
-          <button className="btn btn-outline" onClick={() => { setSearch(''); setCategory('All') }}>Clear filters</button>
+        <div className="glass-panel rounded-[3rem] p-20 text-center flex flex-col items-center gap-6 border-dashed border-white/10">
+          <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center text-slate-600">
+            <Sparkles size={48} />
+          </div>
+          <div className="max-w-xs mx-auto">
+            <h3 className="text-2xl font-bold text-white mb-2">No Courses Found</h3>
+            <p className="text-slate-500">We couldn't find any courses matching your search. Try broadening your criteria.</p>
+          </div>
+          <button 
+            onClick={() => { setSearch(''); setCategory('All') }}
+            className="premium-button"
+          >
+            View All Courses
+          </button>
         </div>
       )}
+
+      {/* Footer / CTA */}
+      <div className="glass-panel p-10 rounded-[3rem] flex flex-col lg:flex-row items-center justify-between gap-8 border-brand-primary/20">
+        <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+          <div className="w-16 h-16 bg-brand-primary/20 rounded-2xl flex items-center justify-center">
+            <BookCopy className="w-8 h-8 text-brand-primary" />
+          </div>
+          <div>
+            <h4 className="text-xl font-bold text-white">Become an Instructor</h4>
+            <p className="text-slate-400 text-sm">Join our network of expert instructors and impact thousands of lives.</p>
+          </div>
+        </div>
+        <button className="premium-button whitespace-nowrap">Apply Today</button>
+      </div>
     </div>
   )
 }

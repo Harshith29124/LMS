@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { enrollmentAPI, progressAPI } from '../services/api'
 import ProgressBar from '../components/ProgressBar'
 import { SkeletonCard } from '../components/Skeleton'
-import { TrendingUp, Award, BookOpen, Target } from 'lucide-react'
+import { TrendingUp, Award, BookOpen, Target, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function ProgressPage() {
@@ -20,14 +20,13 @@ export default function ProgressPage() {
         const enrolled = res.data || []
         setCourses(enrolled)
 
-        // Fetch progress for each enrolled course
         const progEntries = await Promise.all(
           enrolled.map(async (c) => {
             try {
               const p = await progressAPI.getCourseProgress(c._id)
               return [c._id, p.data]
             } catch {
-              return [c._id, { percentage: 0 }]
+              return [c._id, { percentage: 0, completed: 0, total: 0 }]
             }
           })
         )
@@ -51,87 +50,118 @@ export default function ProgressPage() {
     ? Math.round(courses.reduce((s, c) => s + (progressMap[c._id]?.percentage || 0), 0) / courses.length)
     : 0
 
+  if (loading) return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map(i => <div key={i} className="h-24 glass-panel rounded-3xl animate-pulse" />)}
+      </div>
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => <div key={i} className="h-32 glass-panel rounded-3xl animate-pulse" />)}
+      </div>
+    </div>
+  )
+
   return (
-    <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>Learning Progress</h1>
-        <p style={{ color: 'var(--text-secondary-light)', fontSize: 15 }}>Track your learning journey</p>
-      </motion.div>
+    <div className="space-y-10">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-extrabold text-white">Learning Progress</h1>
+          <p className="text-slate-400 mt-2">Track your growth and milestone across all enrolled courses</p>
+        </div>
+        <div className="premium-badge bg-green-500/10 text-green-500 border-green-500/20 px-4 py-2 text-sm">
+          {completed.length} Courses Completed
+        </div>
+      </header>
 
       {/* Summary Stats */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16, marginBottom: 32 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Avg Progress', value: `${avgProg}%`, icon: TrendingUp, color: '#6366F1', bg: 'rgba(99,102,241,0.12)' },
-          { label: 'Completed', value: completed.length, icon: Award, color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
-          { label: 'In Progress', value: inProgress.length, icon: Target, color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-          { label: 'Not Started', value: notStarted.length, icon: BookOpen, color: '#94A3B8', bg: 'rgba(148,163,184,0.12)' },
+          { label: 'Avg Progress', value: `${avgProg}%`, icon: TrendingUp, color: 'text-brand-primary', bg: 'bg-brand-primary/10' },
+          { label: 'Completed', value: completed.length, icon: Award, color: 'text-green-500', bg: 'bg-green-500/10' },
+          { label: 'In Progress', value: inProgress.length, icon: Target, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+          { label: 'Not Started', value: notStarted.length, icon: BookOpen, color: 'text-slate-400', bg: 'bg-slate-500/10' },
         ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="card-flat" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon size={20} color={color} />
+          <motion.div
+            key={label}
+            whileHover={{ y: -5 }}
+            className="glass-panel p-6 rounded-[2rem] flex items-center gap-5"
+          >
+            <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center`}>
+              <Icon className={`w-7 h-7 ${color}`} />
             </div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 800 }}>{value}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary-light)' }}>{label}</div>
+              <p className="text-3xl font-extrabold text-white">{value}</p>
+              <p className="text-sm text-slate-400 font-medium">{label}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Course Progress List */}
-      {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
-          {[1, 2, 3].map((n) => <SkeletonCard key={n} />)}
-        </div>
-      ) : courses.length > 0 ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {courses.map((course) => {
+      {/* Course List */}
+      <div className="space-y-4">
+        {courses.length > 0 ? (
+          courses.map((course) => {
             const prog = progressMap[course._id] || { percentage: 0, completed: 0, total: 0 }
             return (
-              <div key={course._id} className="card-flat" style={{ padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    style={{ width: 72, height: 52, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }}
-                    onError={(e) => { e.target.style.display = 'none' }}
-                  />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {course.title}
-                    </h3>
-                    <ProgressBar value={prog.percentage} height={6} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-                      <span style={{ fontSize: 12, color: 'var(--text-secondary-light)' }}>
-                        {prog.completed || 0} / {prog.total || '?'} lessons
-                      </span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: prog.percentage === 100 ? '#22C55E' : '#6366F1' }}>
-                        {prog.percentage}%
-                      </span>
+              <motion.div
+                key={course._id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="glass-panel group p-6 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 transition-all hover:bg-white/5"
+              >
+                <div className="relative w-40 h-24 rounded-2xl overflow-hidden shadow-lg shadow-black/40">
+                  <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider">
+                    {course.category}
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-4 w-full">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-xl font-bold text-white group-hover:text-brand-primary transition-colors">{course.title}</h3>
+                      <p className="text-sm text-slate-500">Instructor: {course.instructorId?.name}</p>
+                    </div>
+                    <span className={`text-lg font-black ${prog.percentage === 100 ? 'text-green-500' : 'text-brand-primary'}`}>
+                      {prog.percentage}%
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <ProgressBar value={prog.percentage} height={8} />
+                    <div className="flex justify-between text-xs font-bold text-slate-500 tracking-wider">
+                      <span>{prog.completed || 0} / {prog.total || 0} LESSONS COMPLETED</span>
+                      {prog.percentage === 100 && <span className="text-green-500">CERTIFICATE READY</span>}
                     </div>
                   </div>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => navigate(`/courses/${course._id}`)}
-                    id={`progress-course-btn-${course._id}`}
-                    style={{ flexShrink: 0 }}
-                  >
-                    {prog.percentage === 100 ? 'Review' : 'Continue'}
-                  </button>
                 </div>
-              </div>
+
+                <button
+                  onClick={() => navigate(`/courses/${course._id}`)}
+                  className="premium-button flex items-center gap-2 group/btn"
+                >
+                  {prog.percentage === 100 ? 'Review' : 'Continue Learning'}
+                  <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                </button>
+              </motion.div>
             )
-          })}
-        </motion.div>
-      ) : (
-        <div className="empty-state">
-          <div className="empty-state-icon"><TrendingUp size={36} color="#6366F1" /></div>
-          <h3 style={{ fontSize: 18, fontWeight: 700 }}>No progress yet</h3>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary-light)' }}>Enroll in courses to track your progress</p>
-          <button className="btn btn-primary" onClick={() => navigate('/browse')} id="browse-for-progress">Browse Courses</button>
-        </div>
-      )}
+          })
+        ) : (
+          <div className="glass-panel rounded-[3rem] p-16 text-center space-y-6">
+            <div className="w-24 h-24 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto">
+              <BookOpen className="w-12 h-12 text-brand-primary" />
+            </div>
+            <div className="max-w-xs mx-auto space-y-2">
+              <h2 className="text-2xl font-bold text-white">No active courses</h2>
+              <p className="text-slate-400">Your learning journey hasn't started yet. Browse our catalog to find your next skill.</p>
+            </div>
+            <button onClick={() => navigate('/browse')} className="premium-button">
+              Browse Catalog
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

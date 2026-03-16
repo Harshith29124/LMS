@@ -83,6 +83,16 @@
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
   }
 
+  .course-card {
+    @apply relative block;
+    perspective: 1000px;
+  }
+
+  .course-card-inner {
+    @apply relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-surface-900/40 
+           transition-all duration-500 hover:border-brand-primary/30 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)];
+  }
+
   .premium-badge {
     @apply px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-primary/20 text-brand-primary border border-brand-primary/30;
   }

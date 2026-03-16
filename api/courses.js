@@ -1,12 +1,26 @@
 import db from './config/db.js';
 import { cors, authenticate } from './config/middleware.js';
+import { coursePlaylists, DEFAULT_PLAYLIST } from './config/coursePlaylists.js';
+
+/**
+ * Automatically detects a YouTube playlist ID based on keywords in the course title.
+ */
+function detectPlaylist(title) {
+  const lowerTitle = title.toLowerCase();
+  for (const [keyword, id] of Object.entries(coursePlaylists)) {
+    if (lowerTitle.includes(keyword)) {
+      return id;
+    }
+  }
+  return DEFAULT_PLAYLIST;
+}
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
   const url = req.url.split('?')[0];
 
   try {
-    // GET /api/courses (List all) - Handle both /api/courses and /api/courses/
+    // GET /api/courses (List all)
     if ((url === '/api/courses' || url === '/api/courses/') && req.method === 'GET') {
       const { category, search } = req.query;
       let sql = `
@@ -46,12 +60,21 @@ export default async function handler(req, res) {
     if (url.includes('/create') && req.method === 'POST') {
       const decoded = authenticate(req, res);
       if (!decoded) return;
+      
       const { title, description, thumbnail, category, level } = req.body;
+      const playlistId = detectPlaylist(title);
+
       const [result] = await db.query(
-        'INSERT INTO courses (title, description, thumbnail, category, level, instructor_id) VALUES (?, ?, ?, ?, ?, ?)',
-        [title, description, thumbnail, category, level, decoded.id]
+        'INSERT INTO courses (title, description, thumbnail, category, level, instructor_id, playlist_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [title, description, thumbnail, category, level, decoded.id, playlistId]
       );
-      return res.status(201).json({ id: result.insertId, _id: result.insertId, title });
+      
+      return res.status(201).json({ 
+        id: result.insertId, 
+        _id: result.insertId, 
+        title,
+        playlistId 
+      });
     }
 
     // GET /api/courses/get (Single)

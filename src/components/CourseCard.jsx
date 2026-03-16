@@ -1,134 +1,84 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BookOpen, Clock, User, ArrowRight } from 'lucide-react'
+import { Clock, GraduationCap, Star, ArrowRight } from 'lucide-react'
 import ProgressBar from './ProgressBar'
 
-const CATEGORY_COLORS = {
-  Programming: { bg: 'rgba(99,102,241,0.12)', color: '#6366F1' },
-  Design: { bg: 'rgba(236,72,153,0.12)', color: '#EC4899' },
-  Business: { bg: 'rgba(245,158,11,0.12)', color: '#D97706' },
-  Marketing: { bg: 'rgba(34,197,94,0.12)', color: '#16A34A' },
-  'Data Science': { bg: 'rgba(14,165,233,0.12)', color: '#0284C7' },
-  DevOps: { bg: 'rgba(239,68,68,0.12)', color: '#DC2626' },
-  Other: { bg: 'rgba(107,114,128,0.12)', color: '#6B7280' },
-}
-
-export default function CourseCard({ course, progress, enrolled, showProgress }) {
+export default function CourseCard({ course, enrolled, showProgress, progress = 0 }) {
   const navigate = useNavigate()
-  const catStyle = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.Other
-
-  const handleClick = () => {
-    if (enrolled) {
-      navigate(`/courses/${course._id}`)
-    } else {
-      navigate(`/courses/${course._id}`)
-    }
-  }
 
   return (
     <motion.div
-      className="card"
-      style={{ overflow: 'hidden', cursor: 'pointer' }}
-      onClick={handleClick}
-      whileHover={{ y: -4, boxShadow: '0 12px 24px rgba(99,102,241,0.15)' }}
-      transition={{ duration: 0.2 }}
-      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      onClick={() => navigate(`/courses/${course._id || course.id}`)}
+      className="course-card cursor-pointer"
     >
-      {/* Thumbnail */}
-      <div style={{ position: 'relative' }}>
-        <img
-          src={course.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80'}
-          alt={course.title}
-          className="course-thumbnail"
-          onError={(e) => {
-            e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80'
-          }}
-        />
-        {/* Category badge */}
-        <div style={{
-          position: 'absolute', top: 12, left: 12,
-          padding: '4px 10px', borderRadius: 999,
-          fontSize: 12, fontWeight: 600,
-          background: catStyle.bg,
-          color: catStyle.color,
-          backdropFilter: 'blur(8px)',
-          border: `1px solid ${catStyle.color}33`,
-        }}>
-          {course.category}
-        </div>
-        {enrolled && (
-          <div style={{
-            position: 'absolute', top: 12, right: 12,
-            padding: '4px 10px', borderRadius: 999,
-            fontSize: 12, fontWeight: 600,
-            background: 'rgba(34,197,94,0.9)',
-            color: 'white',
-          }}>
-            Enrolled
+      <div className="course-card-inner h-full flex flex-col p-5">
+        {/* Image / Thumbnail Section */}
+        <div className="relative aspect-video rounded-2xl overflow-hidden mb-5">
+          <img
+            src={course.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop'}
+            alt={course.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60" />
+          
+          <div className="absolute top-3 left-3 flex gap-2">
+            <span className="premium-badge">{course.category || 'Skill'}</span>
+            <span className="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-[10px] font-bold text-white border border-white/10">
+              {course.level || 'Beginner'}
+            </span>
           </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div style={{ padding: '16px' }}>
-        <h3 style={{
-          fontSize: 15, fontWeight: 700,
-          color: 'var(--text-primary-light)',
-          marginBottom: 6,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          lineHeight: 1.4,
-        }}>
-          {course.title}
-        </h3>
-
-        <p style={{
-          fontSize: 13, color: 'var(--text-secondary-light)',
-          marginBottom: 12,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          lineHeight: 1.5,
-        }}>
-          {course.description}
-        </p>
-
-        {/* Meta info */}
-        <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-secondary-light)' }}>
-            <User size={13} />
-            <span>{course.instructorId?.name || 'Instructor'}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-secondary-light)' }}>
-            <BookOpen size={13} />
-            <span>{course.level || 'Beginner'}</span>
+          
+          <div className="absolute bottom-3 right-3 text-white flex items-center gap-1">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <span className="text-[10px] font-black">4.9</span>
           </div>
         </div>
 
-        {/* Progress bar (when enrolled) */}
-        {showProgress && progress !== undefined && (
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12, fontWeight: 600, color: 'var(--text-secondary-light)' }}>
-              <span>Progress</span>
-              <span style={{ color: 'var(--primary)' }}>{progress}%</span>
+        {/* Content Section */}
+        <div className="flex-1 flex flex-col justify-between space-y-4">
+          <div>
+            <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-brand-primary transition-colors">
+              {course.title}
+            </h3>
+            <p className="text-sm text-slate-400 line-clamp-2 leading-relaxed h-10">
+              {course.description}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between py-4 border-y border-white/5">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-brand-primary/20 flex items-center justify-center border border-brand-primary/30">
+                <GraduationCap className="w-4 h-4 text-brand-primary" />
+              </div>
+              <span className="text-xs font-bold text-slate-300">
+                {course.instructorId?.name || 'Expert Instructor'}
+              </span>
             </div>
-            <ProgressBar value={progress} height={6} />
+            <div className="flex items-center gap-1.5 text-slate-500">
+              <Clock className="w-4 h-4" />
+              <span className="text-xs font-black uppercase tracking-tighter">12h 30m</span>
+            </div>
           </div>
-        )}
 
-        {/* CTA */}
-        <button
-          className="btn btn-primary btn-sm"
-          style={{ width: '100%', justifyContent: 'center' }}
-          onClick={(e) => { e.stopPropagation(); handleClick() }}
-          id={`course-card-btn-${course._id}`}
-        >
-          {enrolled ? (progress > 0 ? 'Continue Learning' : 'Start Learning') : 'View Course'}
-          <ArrowRight size={14} />
-        </button>
+          {showProgress ? (
+            <div className="space-y-2 pt-2">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">
+                <span>Progress</span>
+                <span className="text-brand-primary">{progress}%</span>
+              </div>
+              <ProgressBar value={progress} height={6} />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-2xl font-black text-white">$0.00</span>
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-all">
+                <ArrowRight className="w-5 h-5" />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   )

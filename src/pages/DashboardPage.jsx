@@ -4,18 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { enrollmentAPI, courseAPI } from '../services/api'
 import CourseCard from '../components/CourseCard'
-import { SkeletonCard } from '../components/Skeleton'
-import { BookOpen, TrendingUp, Award, Clock } from 'lucide-react'
+import { BookOpen, TrendingUp, Award, Clock, ArrowRight, Zap } from 'lucide-react'
 import toast from 'react-hot-toast'
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.07 } },
-}
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-}
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -46,120 +36,135 @@ export default function DashboardPage() {
     ? Math.round(myCourses.reduce((sum, c) => sum + (c.progress || 0), 0) / myCourses.length)
     : 0
 
-  const completedCount = myCourses.filter((c) => c.progress === 100).length
-
   const stats = [
-    { label: 'Enrolled Courses', value: myCourses.length, icon: BookOpen, color: '#6366F1', bg: 'rgba(99,102,241,0.12)' },
-    { label: 'Avg. Progress', value: `${avgProgress}%`, icon: TrendingUp, color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
-    { label: 'Completed', value: completedCount, icon: Award, color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-    { label: 'Hours Learned', value: `${myCourses.length * 3}h`, icon: Clock, color: '#0EA5E9', bg: 'rgba(14,165,233,0.12)' },
+    { label: 'Courses', value: myCourses.length, icon: BookOpen, color: 'text-brand-primary', bg: 'bg-brand-primary/10' },
+    { label: 'Progress', value: `${avgProgress}%`, icon: TrendingUp, color: 'text-green-500', bg: 'bg-green-500/10' },
+    { label: 'Certificates', value: myCourses.filter(c => c.progress === 100).length, icon: Award, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Time Spent', value: `${myCourses.length * 4}h`, icon: Clock, color: 'text-sky-500', bg: 'bg-sky-500/10' },
   ]
 
+  if (loading) return (
+    <div className="space-y-8 animate-pulse">
+      <div className="h-64 glass-panel rounded-[3rem]" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map(i => <div key={i} className="h-24 glass-panel rounded-2xl" />)}
+      </div>
+      <div className="h-48 glass-panel rounded-3xl" />
+    </div>
+  )
+
   return (
-    <motion.div variants={container} initial="hidden" animate="show">
-      {/* Welcome banner */}
-      <motion.div variants={item} style={{
-        background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 50%, #22C55E 100%)',
-        borderRadius: 20, padding: '32px', marginBottom: 28, position: 'relative', overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-        <div style={{ position: 'absolute', bottom: -60, right: 60, width: 150, height: 150, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, marginBottom: 6 }}>
-            {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'} 👋
-          </p>
-          <h1 style={{ color: 'white', fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
-            {user?.name}!
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 15, maxWidth: 400 }}>
-            {myCourses.length > 0
-              ? `You're making great progress! Keep it up.`
-              : 'Start your learning journey today. Browse courses to get started.'}
-          </p>
-          {myCourses.length === 0 && (
-            <button
-              className="btn"
-              style={{ marginTop: 20, background: 'white', color: '#6366F1', fontWeight: 700 }}
-              onClick={() => navigate('/browse')}
-              id="browse-courses-cta"
+    <div className="space-y-12">
+      {/* Welcome Banner */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden group"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/20 via-brand-secondary/10 to-transparent blur-3xl rounded-[3rem]" />
+        <div className="relative glass-panel p-10 lg:p-14 rounded-[3rem] border-white/10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary/10 rounded-full blur-[100px] -mr-48 -mt-48 animate-pulse" />
+          
+          <div className="relative z-10 max-w-2xl space-y-6">
+            <div className="flex items-center gap-3 text-brand-primary mb-2">
+              <Zap className="w-5 h-5 fill-current" />
+              <span className="text-xs font-black uppercase tracking-[0.2em]">Learning Environment Active</span>
+            </div>
+            
+            <h1 className="text-5xl lg:text-6xl font-black text-white leading-tight">
+              Welcome back, <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
+                {user?.name.split(' ')[0]}
+              </span>.
+            </h1>
+            
+            <p className="text-lg text-slate-400 leading-relaxed">
+              {myCourses.length > 0 
+                ? `You're currently enrolled in ${myCourses.length} courses. Your average completion rate is ${avgProgress}%. Ready to dive back in?`
+                : "You haven't started any courses yet. Transform your career today with our expert-led curiculum."
+              }
+            </p>
+
+            <button 
+              onClick={() => navigate(myCourses.length > 0 ? '/my-courses' : '/browse')}
+              className="premium-button flex items-center gap-4 group/btn"
             >
-              Browse Courses
+              {myCourses.length > 0 ? 'Resume Learning' : 'Start Exploring'}
+              <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
             </button>
-          )}
+          </div>
         </div>
       </motion.div>
 
-      {/* Stats */}
-      <motion.div variants={item} style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 32,
-      }}>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="card-flat stat-card" style={{ padding: 20 }}>
-            <div className="stat-icon" style={{ background: bg }}>
-              <Icon size={22} color={color} />
+          <motion.div 
+            key={label}
+            whileHover={{ scale: 1.02 }}
+            className="glass-panel p-6 rounded-3xl flex items-center gap-5 border-white/5"
+          >
+            <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center`}>
+              <Icon className={`w-7 h-7 ${color}`} />
             </div>
             <div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary-light)', lineHeight: 1 }}>{value}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary-light)', marginTop: 4 }}>{label}</div>
+              <p className="text-2xl font-black text-white">{value}</p>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">{label}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </motion.div>
+      </div>
 
-      {/* My courses */}
-      {myCourses.length > 0 && (
-        <motion.div variants={item} style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700 }}>Continue Learning</h2>
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/my-courses')} id="see-all-my-courses">
-              See all →
+      {/* Course Sections */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
+        {/* Continue Learning */}
+        <div className="xl:col-span-2 space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-black text-white">Continure Learning</h2>
+            <button onClick={() => navigate('/my-courses')} className="text-brand-primary text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+              See All <ArrowRight size={16} />
             </button>
           </div>
-          {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-              {[1, 2, 3].map((n) => <SkeletonCard key={n} />)}
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-              {myCourses.slice(0, 3).map((course) => (
-                <CourseCard key={course._id} course={course} progress={course.progress} enrolled showProgress />
-              ))}
-            </div>
-          )}
-        </motion.div>
-      )}
-
-      {/* Featured courses */}
-      <motion.div variants={item}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700 }}>Featured Courses</h2>
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/browse')} id="see-all-featured">
-            Browse all →
-          </button>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {myCourses.slice(0, 2).map((course) => (
+              <CourseCard key={course._id} course={course} progress={course.progress} enrolled showProgress />
+            ))}
+            {myCourses.length === 0 && (
+              <div className="md:col-span-2 h-64 glass-card flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
+                  <BookOpen className="text-slate-500" />
+                </div>
+                <p className="text-slate-400 font-medium italic">No active courses yet</p>
+              </div>
+            )}
+          </div>
         </div>
-        {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-            {[1, 2, 3].map((n) => <SkeletonCard key={n} />)}
+
+        {/* Recommended / Featured Sidebar */}
+        <div className="space-y-8">
+          <h2 className="text-2xl font-black text-white">Recommended</h2>
+          <div className="space-y-4">
+            {featuredCourses.map(course => (
+              <motion.div 
+                key={course._id}
+                whileHover={{ x: 10 }}
+                onClick={() => navigate(`/courses/${course._id}`)}
+                className="glass-panel p-4 rounded-3xl flex items-center gap-4 cursor-pointer group hover:bg-white/5 active:scale-95 transition-all"
+              >
+                <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
+                  <img src={course.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-brand-primary uppercase mb-1">{course.category}</p>
+                  <h4 className="text-sm font-bold text-white truncate group-hover:text-brand-primary transition-colors">{course.title}</h4>
+                </div>
+                <ArrowRight size={16} className="text-slate-600 group-hover:text-white" />
+              </motion.div>
+            ))}
           </div>
-        ) : featuredCourses.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-            {featuredCourses.map((course) => {
-              const enrolled = myCourses.some((c) => c._id === course._id)
-              return <CourseCard key={course._id} course={course} enrolled={enrolled} />
-            })}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <BookOpen size={36} color="#6366F1" />
-            </div>
-            <h3 style={{ fontSize: 16, fontWeight: 600 }}>No courses yet</h3>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary-light)' }}>
-              Courses will appear here once instructors create them
-            </p>
-          </div>
-        )}
-      </motion.div>
-    </motion.div>
+        </div>
+      </div>
+    </div>
   )
 }
