@@ -28,6 +28,14 @@ export default async function handler(req, res) {
       FOREIGN KEY (instructor_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
 
+    // Ensure playlist_id column exists if table was created previously without it
+    try {
+      await db.query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS playlist_id VARCHAR(100) DEFAULT '' AFTER instructor_id`);
+    } catch (e) {
+      // Some MySQL versions don't support ADD COLUMN IF NOT EXISTS, ignore if already exists
+      if (!e.message.includes('Duplicate column name')) throw e;
+    }
+
     await db.query(`CREATE TABLE IF NOT EXISTS lessons (
       id INT AUTO_INCREMENT PRIMARY KEY,
       course_id INT NOT NULL,
