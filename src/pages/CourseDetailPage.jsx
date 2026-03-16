@@ -27,16 +27,18 @@ export default function CourseDetailPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [courseRes, lessonsRes, enrollRes] = await Promise.all([
-          courseAPI.getById(courseId),
-          lessonAPI.getForCourse(courseId),
-          enrollmentAPI.checkEnrollment(courseId),
-        ])
+        // Sequential fetch to avoid hitting DB connection limits (max 5 on Filess.io)
+        const courseRes = await courseAPI.getById(courseId)
+        if (!courseRes.data) throw new Error('Course not found')
         setCourse(courseRes.data)
-        setLessons(lessonsRes.data || [])
-        setEnrolled(enrollRes.data.enrolled)
 
-        if (enrollRes.data.enrolled) {
+        const lessonsRes = await lessonAPI.getForCourse(courseId)
+        setLessons(lessonsRes.data || [])
+
+        const enrollRes = await enrollmentAPI.checkEnrollment(courseId)
+        setEnrolled(enrollRes.data?.enrolled || false)
+
+        if (enrollRes.data?.enrolled) {
           const progRes = await progressAPI.getCourseProgress(courseId)
           setProgress(progRes.data)
         }
@@ -49,15 +51,16 @@ export default function CourseDetailPage() {
             const vids = ytRes.data?.items || []
             if (vids.length > 0) {
               setYtVideos(vids)
+              // Auto-select first video
               setActiveVideoId(vids[0].videoId)
             }
           } catch (ytErr) {
-            console.warn('YouTube playlist fetch failed, using embedded player', ytErr)
+            console.warn('YouTube playlist fetch failed', ytErr)
           }
         }
       } catch (err) {
-        console.error(err)
-        toast.error('Failed to load course data')
+        console.error('Fetch Error:', err)
+        toast.error('Failed to load course details')
       } finally {
         setLoading(false)
       }
