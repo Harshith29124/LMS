@@ -70,26 +70,26 @@ export default function DashboardPage() {
         className="relative overflow-hidden group"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/20 via-brand-secondary/10 to-transparent blur-3xl rounded-[3rem]" />
-        <div className="relative glass-panel p-10 lg:p-14 rounded-[3rem] border-white/10 overflow-hidden">
+        <div className="relative glass-panel p-10 lg:p-14 rounded-[3rem] border-black/5 dark:border-white/10 overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary/10 rounded-full blur-[100px] -mr-48 -mt-48 animate-pulse" />
           
           <div className="relative z-10 max-w-2xl space-y-6">
             <div className="flex items-center gap-3 text-brand-primary mb-2">
               <Zap className="w-5 h-5 fill-current" />
-              <span className="text-xs font-black uppercase tracking-[0.2em]">Learning Environment Active</span>
+              <span className="text-xs font-black uppercase tracking-[0.2em]">Environment Active</span>
             </div>
             
-            <h1 className="text-5xl lg:text-6xl font-black text-white leading-tight">
+            <h1 className="text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-tight">
               Welcome back, <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
-                {user?.name.split(' ')[0]}
+                {user?.name?.split(' ')[0]}
               </span>.
             </h1>
             
-            <p className="text-lg text-slate-400 leading-relaxed">
+            <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
               {myCourses.length > 0 
-                ? `You're currently enrolled in ${myCourses.length} courses. Your average completion rate is ${avgProgress}%. Ready to dive back in?`
-                : "You haven't started any courses yet. Transform your career today with our expert-led curiculum."
+                ? `You're currently enrolled in ${myCourses.length} courses. Your average progress is ${avgProgress}%. Ready to continue?`
+                : "You haven't started any courses yet. Explore our expert-led curriculum today."
               }
             </p>
 
@@ -110,13 +110,13 @@ export default function DashboardPage() {
           <motion.div 
             key={label}
             whileHover={{ scale: 1.02 }}
-            className="glass-panel p-6 rounded-3xl flex items-center gap-5 border-white/5"
+            className="glass-panel p-6 rounded-3xl flex items-center gap-5 border-black/5 dark:border-white/5"
           >
             <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center`}>
               <Icon className={`w-7 h-7 ${color}`} />
             </div>
             <div>
-              <p className="text-2xl font-black text-white">{value}</p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white">{value}</p>
               <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">{label}</p>
             </div>
           </motion.div>
@@ -128,9 +128,9 @@ export default function DashboardPage() {
         {/* Continue Learning */}
         <div className="xl:col-span-2 space-y-8">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-black text-white">Continure Learning</h2>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white">Active Courses</h2>
             <button onClick={() => navigate('/my-courses')} className="text-brand-primary text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
-              See All <ArrowRight size={16} />
+              View All <ArrowRight size={16} />
             </button>
           </div>
           
@@ -140,35 +140,35 @@ export default function DashboardPage() {
                 <CourseCard key={course._id} course={course} progress={course.progress} enrolled showProgress />
               ))
             ) : (
-              <div className="md:col-span-2 h-64 glass-card border border-white/5 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
-                  <BookOpen className="text-slate-500" />
+              <div className="md:col-span-2 h-64 glass-card border border-black/5 dark:border-white/5 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                  <BookOpen className="text-slate-400" />
                 </div>
-                <p className="text-slate-400 font-medium italic">You haven't enrolled in any courses yet</p>
+                <p className="text-slate-500 font-medium italic">No active enrollments</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Recommended / Featured Sidebar */}
+        {/* Recommended Sidebar */}
         <div className="space-y-8">
-          <h2 className="text-2xl font-black text-white">Recommended</h2>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white">Featured</h2>
           <div className="space-y-4">
             {featuredCourses.map(course => (
               <motion.div 
                 key={course._id}
                 whileHover={{ x: 10 }}
                 onClick={() => navigate(`/courses/${course._id}`)}
-                className="glass-panel p-4 rounded-3xl flex items-center gap-4 cursor-pointer group hover:bg-white/5 active:scale-95 transition-all"
+                className="glass-panel p-4 rounded-3xl flex items-center gap-4 cursor-pointer group hover:bg-black/5 dark:hover:bg-white/5 transition-all"
               >
                 <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
                   <img src={course.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-brand-primary uppercase mb-1">{course.category}</p>
-                  <h4 className="text-sm font-bold text-white truncate group-hover:text-brand-primary transition-colors">{course.title}</h4>
+                  <p className="text-[10px] font-bold text-brand-primary uppercase mb-1">{course.category}</p>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-brand-primary transition-colors">{course.title}</h4>
                 </div>
-                <ArrowRight size={16} className="text-slate-600 group-hover:text-white" />
+                <ArrowRight size={16} className="text-slate-300 dark:text-slate-600 group-hover:text-brand-primary" />
               </motion.div>
             ))}
           </div>

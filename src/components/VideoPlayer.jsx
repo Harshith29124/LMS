@@ -31,12 +31,12 @@ export default function VideoPlayer({ url }) {
 
   if (!data) {
     return (
-      <div className="w-full h-full min-h-[400px] bg-surface-950 flex flex-col items-center justify-center gap-6 border border-white/5 p-12 rounded-[2.5rem]">
-        <div className="w-20 h-20 rounded-[2rem] bg-slate-800/30 flex items-center justify-center border border-white/5">
-           <AlertCircle size={40} className="text-slate-600" />
+      <div className="w-full h-full min-h-[400px] bg-slate-100 dark:bg-slate-900/50 flex flex-col items-center justify-center gap-6 border border-white/5 p-12 rounded-[2.5rem]">
+        <div className="w-20 h-20 rounded-[2rem] bg-slate-200 dark:bg-slate-800/30 flex items-center justify-center border border-white/5">
+           <AlertCircle size={40} className="text-slate-400" />
         </div>
         <div className="text-center space-y-2">
-            <h4 className="text-lg font-bold text-white uppercase tracking-widest">Signal Missing</h4>
+            <h4 className="text-lg font-bold text-slate-800 dark:text-white uppercase tracking-widest">Signal Missing</h4>
             <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">No visual asset detected for this module.</p>
         </div>
       </div>

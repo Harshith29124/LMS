@@ -5,11 +5,11 @@ import { CheckCircle, Circle, PlayCircle } from 'lucide-react'
  */
 export default function LessonList({ lessons, activeLessonId, completedLessons = [], onSelect }) {
   return (
-    <div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary-light)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-        Lessons ({lessons.length})
+    <div className="space-y-6 p-4 lg:p-6">
+      <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 px-4">
+        Modules Index ({lessons.length})
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="space-y-1">
         {lessons.map((lesson, index) => {
           const isActive = lesson._id === activeLessonId
           const isCompleted = completedLessons.includes(lesson._id)
@@ -17,33 +17,33 @@ export default function LessonList({ lessons, activeLessonId, completedLessons =
           return (
             <button
               key={lesson._id}
-              className={`lesson-item ${isActive ? 'active' : ''}`}
               onClick={() => onSelect(lesson)}
-              id={`lesson-item-${lesson._id}`}
-              style={{ border: 'none', background: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
+              className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all group text-left ${
+                isActive 
+                ? 'bg-brand-primary/10 border border-brand-primary/20 shadow-lg' 
+                : 'hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
+              }`}
             >
               {/* Completion indicator */}
-              <div style={{ flexShrink: 0 }}>
+              <div className="flex-shrink-0">
                 {isCompleted ? (
-                  <CheckCircle size={18} color="#22C55E" />
+                   <CheckCircle size={18} className="text-green-500" />
                 ) : isActive ? (
-                  <PlayCircle size={18} color="#6366F1" />
+                   <PlayCircle size={18} className="text-brand-primary" />
                 ) : (
-                  <Circle size={18} color="#94A3B8" />
+                   <div className="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-800" />
                 )}
               </div>
 
               {/* Content */}
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                <div style={{
-                  fontSize: 13, fontWeight: isActive ? 600 : 500,
-                  color: isActive ? 'var(--primary)' : 'var(--text-primary-light)',
-                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                }}>
-                  {index + 1}. {lesson.title}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--text-secondary-light)', marginTop: 1 }}>
-                  {lesson.duration || '5 min'}
+              <div className="flex-1 min-w-0">
+                <p className={`text-xs font-bold truncate tracking-wide ${isActive ? 'text-brand-primary' : 'text-slate-800 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
+                  {String(index + 1).padStart(2, '0')}. {lesson.title}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                     {lesson.duration || '05:00'}
+                   </p>
                 </div>
               </div>
             </button>

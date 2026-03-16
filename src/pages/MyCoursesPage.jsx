@@ -40,7 +40,7 @@ export default function MyCoursesPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
         animate={{ opacity: 1, y: 0 }}
-        className="relative glass-panel p-10 lg:p-14 rounded-[4rem] overflow-hidden border-white/5"
+        className="relative glass-panel p-10 lg:p-14 rounded-[4rem] overflow-hidden border-black/5 dark:border-white/5"
       >
         <div className="absolute top-0 left-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-[80px] -ml-32 -mt-32" />
         
@@ -50,16 +50,16 @@ export default function MyCoursesPage() {
                     <Sparkles size={16} />
                     <span className="text-[10px] font-black uppercase tracking-[0.3em]">Knowledge Assets</span>
                 </div>
-                <h1 className="text-4xl lg:text-5xl font-black text-white">My Library</h1>
-                <p className="text-slate-400 max-w-sm">Manage your active learning paths and technical specializations across {courses.length} enrolled modules.</p>
+                <h1 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">Curated Path</h1>
+                <p className="text-slate-600 dark:text-slate-400 max-w-sm font-medium">Manage your active learning modules and technical specializations across {courses.length} enrollments.</p>
             </div>
             
-            <div className="flex items-center gap-6 p-6 rounded-3xl bg-white/5 border border-white/5">
+            <div className="flex items-center gap-6 p-6 rounded-3xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
                 <div className="text-right">
-                    <p className="text-2xl font-black text-white leading-none">{courses.length}</p>
+                    <p className="text-2xl font-black text-slate-900 dark:text-white leading-none">{courses.length}</p>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">Modules</p>
                 </div>
-                <div className="w-px h-10 bg-white/10" />
+                <div className="w-px h-10 bg-black/5 dark:bg-white/10" />
                 <div className="text-right">
                     <p className="text-2xl font-black text-brand-primary leading-none">
                       {courses.filter(c => c.progress === 100).length}
@@ -73,9 +73,9 @@ export default function MyCoursesPage() {
       {/* Grid Content */}
       <div className="space-y-8">
         <div className="flex items-center justify-between px-4">
-            <h2 className="text-2xl font-black text-white">Current Track</h2>
-            <div className="h-px flex-1 bg-white/5 mx-8" />
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">A-Z</span>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white">Active Track</h2>
+            <div className="h-px flex-1 bg-black/5 dark:bg-white/5 mx-8" />
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Chronological</span>
         </div>
 
         {courses.length > 0 ? (
@@ -85,19 +85,19 @@ export default function MyCoursesPage() {
             ))}
           </div>
         ) : (
-          <div className="glass-panel border border-white/5 rounded-[3rem] p-24 text-center space-y-6">
-            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-slate-500">
+          <div className="glass-panel border border-black/5 dark:border-white/5 rounded-[3rem] p-24 text-center space-y-6">
+            <div className="w-20 h-20 bg-black/5 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto text-slate-400">
                <BookOpen size={40} />
             </div>
             <div className="max-w-xs mx-auto space-y-2">
-              <h3 className="text-xl font-bold text-white">Your library is empty</h3>
-              <p className="text-sm text-slate-500">Enroll in a course from the catalog to start your learning journey.</p>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Environment Clear</h3>
+              <p className="text-sm text-slate-500 font-medium">No active courses detected in your library. Visit the core sync to enroll.</p>
             </div>
             <button 
                 onClick={() => navigate('/browse')}
                 className="premium-button px-8"
             >
-              Browse Courses
+              Sync Modules
             </button>
           </div>
         )}

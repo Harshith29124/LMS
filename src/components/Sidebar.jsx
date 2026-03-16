@@ -34,7 +34,7 @@ export default function Sidebar({ open, onClose }) {
 
   return (
     <aside className={`fixed inset-y-0 left-0 z-50 w-72 transition-transform duration-500 transform lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
-      <div className="h-full glass-panel border-r border-white/5 flex flex-col p-6 rounded-r-[3rem] lg:rounded-none">
+      <div className="h-full glass-panel border-r border-black/5 dark:border-white/5 flex flex-col p-6 rounded-r-[3rem] lg:rounded-none">
         {/* Logo */}
         <div className="flex items-center justify-between mb-10 px-2">
           <div className="flex items-center gap-4">
@@ -42,23 +42,23 @@ export default function Sidebar({ open, onClose }) {
               <GraduationCap className="text-white w-7 h-7" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white leading-none">CraftConnect</h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-none">CraftConnect</h1>
               <p className="text-[10px] font-semibold text-brand-primary tracking-widest mt-1 uppercase">LMS Platform</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl lg:hidden text-slate-400">
+          <button onClick={onClose} className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl lg:hidden text-slate-400">
             <X size={20} />
           </button>
         </div>
 
         {/* User Workspace */}
         <div className="mb-10 px-2">
-          <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center border border-white/10 overflow-hidden">
-               <span className="text-lg font-bold text-white">{user?.name?.[0]?.toUpperCase()}</span>
+          <div className="p-4 rounded-3xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center border border-black/5 dark:border-white/10 overflow-hidden">
+               <span className="text-lg font-bold text-slate-900 dark:text-white">{user?.name?.[0]?.toUpperCase()}</span>
             </div>
             <div className="flex-1 min-w-0">
-               <p className="font-semibold text-white truncate text-sm">{user?.name}</p>
+               <p className="font-semibold text-slate-800 dark:text-white truncate text-sm">{user?.name}</p>
                <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{user?.role}</p>
             </div>
           </div>
@@ -66,7 +66,7 @@ export default function Sidebar({ open, onClose }) {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-2">
-          <p className="px-4 text-[10px] font-semibold text-slate-500 uppercase tracking-[0.2em] mb-4">Navigation</p>
+          <p className="px-4 text-[10px] font-semibold text-slate-500 uppercase tracking-[0.2em] mb-4">Workspace</p>
           {items.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -76,14 +76,14 @@ export default function Sidebar({ open, onClose }) {
               className={({ isActive }) => `nav-link group ${isActive ? 'active' : ''}`}
             >
               <Icon size={18} className="group-hover:scale-110 transition-transform" />
-              <span className="flex-1 text-sm">{label}</span>
+              <span className="flex-1 text-sm font-bold">{label}</span>
               <ChevronRight className={`transition-all duration-300 w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1`} />
             </NavLink>
           ))}
         </nav>
 
         {/* Action Footer */}
-        <div className="pt-6 border-t border-white/5">
+        <div className="pt-6 border-t border-black/5 dark:border-white/5">
           <button 
             onClick={handleLogout}
             className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-rose-500 font-semibold text-sm hover:bg-rose-500/10 transition-all group active:scale-95"

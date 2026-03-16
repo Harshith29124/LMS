@@ -25,9 +25,11 @@ import ProfilePage from './pages/ProfilePage'
 // Protected route wrapper
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth()
-  if (loading) return <div className="flex items-center justify-center min-h-screen">
-    <div style={{ width: 40, height: 40, border: '3px solid #6366F1', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-  </div>
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-surface dark:bg-surface-950">
+      <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(99,102,241,0.3)]" />
+    </div>
+  )
   if (!user) return <Navigate to="/login" replace />
   if (role && user.role !== role) return <Navigate to="/dashboard" replace />
   return children
