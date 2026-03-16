@@ -5,7 +5,8 @@ import { courseAPI, lessonAPI, enrollmentAPI, progressAPI } from '../services/ap
 import { useAuth } from '../hooks/useAuth'
 import LessonList from '../components/LessonList'
 import ProgressBar from '../components/ProgressBar'
-import { BookOpen, Users, Clock, Tag, CheckCircle, Lock, PlayCircle, Trophy, Sparkles } from 'lucide-react'
+import VideoPlayer from '../components/VideoPlayer'
+import { BookOpen, Users, Star, CheckCircle, Lock, PlayCircle, Trophy, Sparkles, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function CourseDetailPage() {
@@ -37,7 +38,7 @@ export default function CourseDetailPage() {
         }
       } catch (err) {
         console.error(err)
-        toast.error('Failed to load course details')
+        toast.error('Failed to load system metadata')
       } finally {
         setLoading(false)
       }
@@ -50,12 +51,11 @@ export default function CourseDetailPage() {
     try {
       await enrollmentAPI.enroll(courseId)
       setEnrolled(true)
-      toast.success('Congratulations! You are enrolled. 🎉')
-      // Refresh progress after enrollment
+      toast.success('Access Link Established. Profile Updated. 🎉')
       const progRes = await progressAPI.getCourseProgress(courseId)
       setProgress(progRes.data)
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Enrollment failed')
+      toast.error(err.response?.data?.message || 'Synchronization failed')
     } finally {
       setEnrolling(false)
     }
@@ -76,33 +76,26 @@ export default function CourseDetailPage() {
 
   if (!course) return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
-      <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center">
-         <X size={48} className="text-red-500" />
+      <div className="w-24 h-24 bg-rose-500/10 rounded-full flex items-center justify-center">
+         <X size={48} className="text-rose-500" />
       </div>
-      <h2 className="text-3xl font-black text-white">Course Not Found</h2>
+      <h2 className="text-3xl font-black text-white">Course Index Missing</h2>
       <button onClick={() => navigate('/browse')} className="premium-button">Back to Catalog</button>
     </div>
   )
 
   const DEFAULT_PLAYLIST = 'PLWKjhJtqVAbnSe1qUNMG7AbPmjIG54u88'
-  const videoSrc = `https://www.youtube.com/embed/videoseries?list=${course.playlist_id || DEFAULT_PLAYLIST}`
 
   return (
     <div className="space-y-12 pb-20">
-      {/* Mobile Video Player - Top */}
+      {/* Mobile Feed Overlay - Top */}
       <div className="lg:hidden w-full aspect-video rounded-3xl overflow-hidden glass-panel border-white/10 shadow-2xl">
-        <iframe
-          src={videoSrc}
-          className="w-full h-full border-0"
-          allowFullScreen
-          title="Course Playlist"
-        />
+         <VideoPlayer url={course.playlist_id || DEFAULT_PLAYLIST} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Left Column: Details & Content */}
+        {/* Module Diagnostics & Content */}
         <div className="lg:col-span-2 space-y-10">
-          {/* Header Info */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
             <div className="flex flex-wrap items-center gap-4 mb-6">
               <span className="premium-badge">{course.category}</span>
@@ -115,114 +108,108 @@ export default function CourseDetailPage() {
             <div className="flex flex-wrap gap-8 py-6 border-y border-white/5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-brand-primary" />
+                   <Users className="w-5 h-5 text-brand-primary" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase">Instructor</p>
-                  <p className="text-sm font-bold text-white">{course.instructorId?.name}</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase">Lead Engineer</p>
+                   <p className="text-sm font-bold text-white">{course.instructorId?.name}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
-                  <PlayCircle className="w-5 h-5 text-green-500" />
+                   <PlayCircle className="w-5 h-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase">Resources</p>
-                  <p className="text-sm font-bold text-white">{lessons.length} Lessons</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase">Data Modules</p>
+                   <p className="text-sm font-bold text-white">{lessons.length} Lessons</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                  <Star className="w-5 h-5 text-amber-500" />
+                   <Star className="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase">Rating</p>
-                  <p className="text-sm font-bold text-white">4.9 (2.4k reviews)</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase">Trust Level</p>
+                   <p className="text-sm font-bold text-white">4.9 System Rating</p>
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* About Section */}
-          <section className="glass-panel p-8 rounded-[2.5rem] space-y-6">
+          {/* Detailed Documentation Section */}
+          <section className="glass-panel p-8 lg:p-12 rounded-[3.5rem] space-y-8">
             <div className="flex items-center gap-4 text-white">
                <Sparkles className="text-brand-primary" />
-               <h2 className="text-2xl font-black">About this course</h2>
+               <h2 className="text-2xl font-black uppercase tracking-widest">Protocol Description</h2>
             </div>
-            <p className="text-slate-400 leading-relaxed whitespace-pre-line text-lg">
+            <p className="text-slate-400 leading-relaxed whitespace-pre-line text-lg prose prose-invert">
               {course.description}
             </p>
           </section>
 
-          {/* Lessons List Section */}
+          {/* Curriculum Mapping Section */}
           <section className="space-y-8">
-            <h2 className="text-2xl font-black text-white px-2">Course Curiculum</h2>
-            <div className="glass-panel rounded-[2.5rem] overflow-hidden">
+            <h2 className="text-2xl font-black text-white px-2 uppercase tracking-widest">Curiculum Index</h2>
+            <div className="glass-panel rounded-[4rem] overflow-hidden border-white/5 shadow-2xl">
                 <LessonList 
                   lessons={lessons} 
                   completedLessons={progress.completedLessons}
                   onSelect={(l) => {
                     if (enrolled) navigate(`/courses/${courseId}/lessons/${l._id}`)
-                    else toast.error('Enroll now to access lessons')
+                    else toast.error('Enrollment required for module access')
                   }}
                 />
                 {lessons.length === 0 && (
-                  <div className="p-20 text-center text-slate-500">
-                    <BookOpen size={48} className="mx-auto mb-4 opacity-20" />
-                    <p className="font-bold">No lesson assets uploaded yet.</p>
+                  <div className="p-24 text-center text-slate-800">
+                    <BookOpen size={64} className="mx-auto mb-6 opacity-10" />
+                    <p className="font-bold uppercase tracking-[0.2em] text-sm">No data assets programmed yet.</p>
                   </div>
                 )}
             </div>
           </section>
         </div>
 
-        {/* Right Column: Player & Enrollment */}
+        {/* System Operations Column */}
         <div className="space-y-8">
-          {/* Desktop Player - Top of Right Column */}
-          <div className="hidden lg:block w-full aspect-video rounded-[2.5rem] overflow-hidden glass-panel border-white/10 shadow-2xl sticky top-24">
-            {/* If Not Enrolled, Show Thumbnail with Play Button Overlay */}
+          {/* Primary Visual Interface */}
+          <div className="hidden lg:block w-full sticky top-24">
             {!enrolled ? (
-              <div className="relative w-full h-full group cursor-pointer" onClick={handleEnroll}>
-                <img src={course.thumbnail} className="w-full h-full object-cover opacity-50 transition-all group-hover:scale-105 duration-700" alt="" />
+              <div className="relative aspect-video rounded-[3rem] overflow-hidden glass-panel border-white/10 shadow-2xl group cursor-pointer" onClick={handleEnroll}>
+                <img src={course.thumbnail} className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" alt="" />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                  <div className="w-20 h-20 rounded-full bg-brand-primary flex items-center justify-center animate-pulse">
+                  <div className="w-20 h-20 rounded-[2rem] bg-brand-primary flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform">
                      <PlayCircle className="w-10 h-10 text-white fill-white" />
                   </div>
                 </div>
               </div>
             ) : (
-              <iframe
-                src={videoSrc}
-                className="w-full h-full border-0"
-                allowFullScreen
-                title="Course Playlist"
-              />
+              <VideoPlayer url={course.playlist_id || DEFAULT_PLAYLIST} />
             )}
           </div>
 
           <div className={`${enrolled ? '' : 'sticky top-24'} space-y-6`}>
-            {/* Enrollment Status / CTA */}
-            <div className="glass-panel p-8 rounded-[2.5rem] space-y-6 border-brand-primary/20">
+            {/* Enrollment Logic Panel */}
+            <div className="glass-panel p-8 lg:p-10 rounded-[3.5rem] space-y-8 border-brand-primary/10 bg-gradient-to-br from-white/[0.02] to-transparent">
               {enrolled ? (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-green-500/10 border border-green-500/20">
+                <div className="space-y-8">
+                  <div className="flex items-center gap-4 p-5 rounded-2xl bg-green-500/10 border border-green-500/20">
                     <CheckCircle className="text-green-500" />
                     <div>
-                      <p className="text-sm font-black text-white uppercase tracking-wider">Access Granted</p>
-                      <p className="text-[10px] font-bold text-green-500/80">Premium Playlist Unlocked</p>
+                      <p className="text-[10px] font-black text-white uppercase tracking-widest">Access Identity Verified</p>
+                      <p className="text-xs font-bold text-green-500/80 italic">Authorized for Full Catalog Feed</p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                     <div className="flex justify-between items-end">
-                       <p className="text-sm font-black text-white uppercase">Your Progress</p>
-                       <p className="text-2xl font-black text-brand-primary">{progress.percentage}%</p>
+                     <div className="flex justify-between items-end px-2">
+                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Synchronization</p>
+                       <p className="text-2xl font-black text-white">{progress.percentage}%</p>
                      </div>
-                     <ProgressBar value={progress.percentage} height={10} />
-                     <p className="text-xs text-slate-500 font-bold text-center italic">
-                        {progress.completed || 0} of {progress.total || lessons.length} lessons finished
+                     <ProgressBar value={progress.percentage} height={8} />
+                     <p className="text-[10px] text-slate-500 font-bold text-center uppercase tracking-widest">
+                        {progress.completed || 0} / {lessons.length} Modules Finalized
                      </p>
                   </div>
 
@@ -231,28 +218,28 @@ export default function CourseDetailPage() {
                         const next = lessons.find(l => !progress.completedLessons.includes(l._id)) || lessons[0]
                         if (next) navigate(`/courses/${courseId}/lessons/${next._id}`)
                     }}
-                    className="premium-button w-full shadow-lg shadow-brand-primary/20"
+                    className="premium-button w-full shadow-2xl shadow-brand-primary/30"
                   >
-                    {progress.percentage === 100 ? 'Review Course' : 'Continue Learning'}
+                    {progress.percentage === 100 ? 'Reset Simulation' : 'Continue Synchronization'}
                   </button>
                 </div>
               ) : (
-                <div className="space-y-8">
-                  <div className="space-y-2">
-                    <h3 className="text-3xl font-black text-white">Unlock Course</h3>
-                    <p className="text-slate-400 text-sm">Join the student community and master this topic today.</p>
+                <div className="space-y-10 text-center lg:text-left">
+                  <div className="space-y-3">
+                    <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Initialize Access</h3>
+                    <p className="text-slate-500 text-xs font-bold leading-relaxed">Bridge your profile to this module to unlock the full technical feed.</p>
                   </div>
 
                   <div className="space-y-4">
                     {[
-                      'Full Access to YouTube Playlist',
-                      'Lesson Assets & Resources',
-                      'Certificate of Completion',
-                      'Life-time Support Access'
+                      'Real-time Playlist Linkage',
+                      'Internal Module Documentation',
+                      'System Validation Quizzes',
+                      'Technical Badge of Merit'
                     ].map(feat => (
-                      <div key={feat} className="flex items-center gap-3 text-slate-300">
-                        <Trophy size={16} className="text-brand-secondary" />
-                        <span className="text-xs font-bold">{feat}</span>
+                      <div key={feat} className="flex items-center gap-4 text-slate-400">
+                        <Trophy size={14} className="text-brand-secondary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{feat}</span>
                       </div>
                     ))}
                   </div>
@@ -260,27 +247,27 @@ export default function CourseDetailPage() {
                   <button 
                     onClick={handleEnroll}
                     disabled={enrolling}
-                    className="premium-button w-full"
+                    className="premium-button w-full text-sm py-5"
                   >
-                    {enrolling ? 'Processing...' : '🚀 Enroll For Free'}
+                    {enrolling ? 'Establishing Link...' : '🚀 Synchronize Now'}
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Curriculum Summary for sidebar */}
-            <div className="glass-panel p-8 rounded-[2.5rem] space-y-4">
-               <h4 className="text-sm font-black text-white uppercase tracking-widest">Section Overview</h4>
-               <div className="space-y-3">
-                  {lessons.slice(0, 4).map((l, i) => (
-                    <div key={l._id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 group hover:border-brand-primary/20 transition-all">
-                       <span className="text-xs font-black text-slate-600 group-hover:text-brand-primary">{String(i+1).padStart(2, '0')}</span>
-                       <p className="text-xs font-bold text-slate-400 group-hover:text-white truncate flex-1">{l.title}</p>
-                       {enrolled ? <PlayCircle size={14} className="text-slate-600 group-hover:text-brand-primary" /> : <Lock size={12} className="text-slate-800" />}
+            {/* Curriculum Preview Tracker */}
+            <div className="glass-panel p-8 lg:p-10 rounded-[3.5rem] space-y-6">
+               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Module Sequence</h4>
+               <div className="space-y-4">
+                  {lessons.slice(0, 5).map((l, i) => (
+                    <div key={l._id} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-all cursor-crosshair">
+                       <span className="text-[10px] font-black text-slate-700 group-hover:text-brand-primary transition-colors">{String(i+1).padStart(2, '0')}</span>
+                       <p className="text-[10px] font-black text-slate-500 group-hover:text-white truncate flex-1 tracking-wider">{l.title}</p>
+                       {enrolled ? <PlayCircle size={14} className="text-brand-primary animate-pulse" /> : <Lock size={12} className="text-slate-800" />}
                     </div>
                   ))}
-                  {lessons.length > 4 && (
-                    <p className="text-[10px] text-center font-bold text-slate-600 pt-2 tracking-widest">+{lessons.length - 4} MORE ASSETS</p>
+                  {lessons.length > 5 && (
+                    <p className="text-[9px] text-center font-black text-slate-700 pt-4 uppercase tracking-[0.4em]">+{lessons.length - 5} Encrypted Assets</p>
                   )}
                </div>
             </div>
