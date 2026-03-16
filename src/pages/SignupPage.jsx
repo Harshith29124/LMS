@@ -1,155 +1,151 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, GraduationCap } from 'lucide-react'
+import { User, Mail, Lock, UserPlus, GraduationCap, Briefcase } from 'lucide-react'
 import { authAPI } from '../services/api'
-import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 
 export default function SignupPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'learner' })
-  const [showPass, setShowPass] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [role, setRole] = useState('learner')
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault()
-    if (form.password.length < 6) {
-      return toast.error('Password must be at least 6 characters')
-    }
     setLoading(true)
     try {
-      const { data } = await authAPI.signup(form)
-      login(data)
-      toast.success(`Account created! Welcome, ${data.name}! 🎉`)
-      navigate(data.role === 'instructor' ? '/instructor' : '/dashboard')
+      const res = await authAPI.signup({ name, email, password, role })
+      localStorage.setItem('lms_user', JSON.stringify(res.data))
+      toast.success('Account created!')
+      navigate('/')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Signup failed')
+      toast.error(err.response?.data?.message || 'Error creating account')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <div style={{
-          width: 56, height: 56, borderRadius: 16,
-          background: 'linear-gradient(135deg, #6366F1, #22C55E)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 16px',
-        }}>
-          <GraduationCap size={28} color="white" />
-        </div>
-        <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>Create your account</h1>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary-light)' }}>Join thousands of learners today</p>
-      </div>
-
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="signup-name">Full name</label>
-          <input
-            id="signup-name"
-            type="text"
-            className="form-input"
-            placeholder="John Doe"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="signup-email">Email address</label>
-          <input
-            id="signup-email"
-            type="email"
-            className="form-input"
-            placeholder="you@example.com"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="signup-password">Password</label>
-          <div style={{ position: 'relative' }}>
-            <input
-              id="signup-password"
-              type={showPass ? 'text' : 'password'}
-              className="form-input"
-              placeholder="Min. 6 characters"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
-              style={{ paddingRight: 44 }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              aria-label="Toggle password visibility"
-              style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
-            >
-              {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+    <div className="min-h-screen auth-bg flex items-center justify-center p-6">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-xl"
+      >
+        <div className="glass-panel p-10 rounded-[2.5rem] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 rounded-full blur-3xl -mr-16 -mt-16" />
+          
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-extrabold tracking-tight text-white mb-3">Join CraftConnect</h1>
+            <p className="text-slate-400">Master new skills with our expert-led platform</p>
           </div>
-        </div>
 
-        {/* Role selection */}
-        <div className="form-group">
-          <label className="form-label">I am a...</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {[
-              { value: 'learner', label: '🎓 Learner', desc: 'Browse & take courses' },
-              { value: 'instructor', label: '🧑‍🏫 Instructor', desc: 'Create & teach courses' },
-            ].map(({ value, label, desc }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setForm({ ...form, role: value })}
-                id={`role-${value}`}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: 10,
-                  border: `2px solid ${form.role === value ? '#6366F1' : 'var(--border-light)'}`,
-                  background: form.role === value ? 'rgba(99,102,241,0.08)' : 'transparent',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <div style={{ fontSize: 15, fontWeight: 600, color: form.role === value ? '#6366F1' : 'var(--text-primary-light)', marginBottom: 2 }}>
-                  {label}
+          <form onSubmit={handleSignup} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300 ml-1">Full Name</label>
+                <div className="relative group">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+                  <input
+                    type="text"
+                    required
+                    className="input-field pl-12"
+                    placeholder="Jane Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-secondary-light)' }}>{desc}</div>
-              </button>
-            ))}
-          </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300 ml-1">Email Address</label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+                  <input
+                    type="email"
+                    required
+                    className="input-field pl-12"
+                    placeholder="email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-300 ml-1">Password</label>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+                <input
+                  type="password"
+                  required
+                  className="input-field pl-12"
+                  placeholder="Min 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <label className="text-sm font-medium text-slate-300 ml-1">Choose your role</label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setRole('learner')}
+                  className={`flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
+                    role === 'learner' 
+                      ? 'bg-brand-primary/10 border-brand-primary shadow-lg shadow-brand-primary/20' 
+                      : 'bg-white/5 border-white/5 hover:border-white/10'
+                  }`}
+                >
+                  <GraduationCap className={`w-8 h-8 ${role === 'learner' ? 'text-brand-primary' : 'text-slate-500'}`} />
+                  <div className="text-center">
+                    <p className={`font-bold ${role === 'learner' ? 'text-white' : 'text-slate-400'}`}>Learner</p>
+                    <p className="text-[10px] text-slate-500">I want to learn</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRole('instructor')}
+                  className={`flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
+                    role === 'instructor' 
+                      ? 'bg-brand-secondary/10 border-brand-secondary shadow-lg shadow-brand-secondary/20' 
+                      : 'bg-white/5 border-white/5 hover:border-white/10'
+                  }`}
+                >
+                  <Briefcase className={`w-8 h-8 ${role === 'instructor' ? 'text-brand-secondary' : 'text-slate-500'}`} />
+                  <div className="text-center">
+                    <p className={`font-bold ${role === 'instructor' ? 'text-white' : 'text-slate-400'}`}>Instructor</p>
+                    <p className="text-[10px] text-slate-500">I want to teach</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="premium-button w-full h-14 flex items-center justify-center gap-2 group text-lg"
+            >
+              {loading ? 'Creating Account...' : 'Get Started Free'}
+              <UserPlus className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+            </button>
+          </form>
+
+          <p className="text-center text-slate-500 mt-10">
+            Already have an account?{' '}
+            <Link to="/login" className="text-brand-primary font-bold hover:underline">
+              Sign In
+            </Link>
+          </p>
         </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary btn-lg"
-          style={{ width: '100%', marginTop: 4 }}
-          disabled={loading}
-          id="signup-submit-btn"
-        >
-          {loading ? 'Creating account...' : 'Create Account'}
-        </button>
-      </form>
-
-      <p style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'var(--text-secondary-light)' }}>
-        Already have an account?{' '}
-        <Link to="/login" style={{ color: '#6366F1', fontWeight: 600, textDecoration: 'none' }}>
-          Sign in
-        </Link>
-      </p>
-    </motion.div>
+      </motion.div>
+    </div>
   )
 }

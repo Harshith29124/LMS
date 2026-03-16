@@ -1,125 +1,100 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, GraduationCap } from 'lucide-react'
+import { Mail, Lock, LogIn, ArrowRight } from 'lucide-react'
 import { authAPI } from '../services/api'
-import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [showPass, setShowPass] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      const { data } = await authAPI.login(form)
-      login(data)
-      toast.success(`Welcome back, ${data.name}! 🎉`)
-      navigate(data.role === 'instructor' ? '/instructor' : '/dashboard')
+      const res = await authAPI.login({ email, password })
+      localStorage.setItem('lms_user', JSON.stringify(res.data))
+      toast.success('Successfully logged in')
+      navigate('/')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed')
+      toast.error(err.response?.data?.message || 'Invalid credentials')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      {/* Logo */}
-      <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <div style={{
-          width: 56, height: 56, borderRadius: 16,
-          background: 'linear-gradient(135deg, #6366F1, #22C55E)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 16px',
-        }}>
-          <GraduationCap size={28} color="white" />
-        </div>
-        <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>Welcome back</h1>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary-light)' }}>
-          Sign in to continue your learning journey
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="login-email">Email address</label>
-          <input
-            id="login-email"
-            type="email"
-            className="form-input"
-            placeholder="you@example.com"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="login-password">Password</label>
-          <div style={{ position: 'relative' }}>
-            <input
-              id="login-password"
-              type={showPass ? 'text' : 'password'}
-              className="form-input"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
-              style={{ paddingRight: 44 }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              aria-label="Toggle password visibility"
-              style={{
-                position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8',
-              }}
-            >
-              {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+    <div className="min-h-screen auth-bg flex items-center justify-center p-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
+      >
+        <div className="glass-panel p-8 rounded-[2rem] relative">
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-brand-primary rounded-3xl rotate-12 flex items-center justify-center shadow-2xl shadow-brand-primary/40">
+            <LogIn className="w-12 h-12 text-white -rotate-12" />
           </div>
+
+          <div className="text-center mt-8 mb-10">
+            <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Welcome Back</h1>
+            <p className="text-slate-400">Sign in to continue your learning journey</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-300 ml-1">Email Address</label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+                <input
+                  type="email"
+                  required
+                  className="input-field pl-12"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between ml-1">
+                <label className="text-sm font-medium text-slate-300">Password</label>
+                <a href="#" className="text-xs text-brand-primary hover:underline">Forgot?</a>
+              </div>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+                <input
+                  type="password"
+                  required
+                  className="input-field pl-12"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="premium-button w-full flex items-center justify-center gap-2 group"
+            >
+              {loading ? 'Authenticating...' : 'Sign In'}
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </form>
+
+          <p className="text-center text-slate-400 mt-8">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-brand-primary font-semibold hover:underline decoration-brand-primary/30">
+              Join CraftConnect
+            </Link>
+          </p>
         </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary btn-lg"
-          style={{ width: '100%', marginTop: 8 }}
-          disabled={loading}
-          id="login-submit-btn"
-        >
-          {loading ? 'Signing in...' : 'Sign In'}
-        </button>
-      </form>
-
-      {/* Demo credentials */}
-      <div style={{
-        marginTop: 20, padding: '12px 16px',
-        background: 'rgba(99,102,241,0.06)',
-        borderRadius: 10, border: '1px solid rgba(99,102,241,0.15)',
-        fontSize: 12, color: 'var(--text-secondary-light)',
-      }}>
-        <strong style={{ color: '#6366F1' }}>Demo accounts:</strong><br />
-        Learner: learner@demo.com / password123<br />
-        Instructor: instructor@demo.com / password123
-      </div>
-
-      <p style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'var(--text-secondary-light)' }}>
-        Don't have an account?{' '}
-        <Link to="/signup" style={{ color: '#6366F1', fontWeight: 600, textDecoration: 'none' }}>
-          Sign up free
-        </Link>
-      </p>
-    </motion.div>
+      </motion.div>
+    </div>
   )
 }
